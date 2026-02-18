@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { badRequest, json, notFound, safeJsonArray } from '../../_shared';
+import { badRequest, json, notFound, requireAuth, safeJsonArray } from '../../_shared';
 
 function mapExperience(row: any, technologies: string[]) {
   return {
@@ -26,6 +26,9 @@ async function listTech(env: any, experienceId: number) {
 }
 
 export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, params, request }) => {
+  const authError = await requireAuth(env, request);
+  if (authError) return authError;
+
   const id = Number(params.id);
   if (!id) return badRequest('Invalid experience id');
 
@@ -72,7 +75,10 @@ export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async 
   return json(mapExperience(updated, await listTech(env, id)));
 };
 
-export const onRequestDelete: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, params }) => {
+export const onRequestDelete: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, params, request }) => {
+  const authError = await requireAuth(env, request);
+  if (authError) return authError;
+
   const id = Number(params.id);
   if (!id) return badRequest('Invalid experience id');
 

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { badRequest, json } from '../_shared';
+import { badRequest, json, requireAuth } from '../_shared';
 
 type ProfilePayload = {
   name: string;
@@ -53,6 +53,9 @@ export const onRequestGet: PagesFunction<{ portofolio_db: D1Database }> = async 
 };
 
 export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, request }) => {
+  const authError = await requireAuth(env, request);
+  if (authError) return authError;
+
   const body = (await request.json()) as ProfilePayload;
 
   if (!body.name || !body.tagline || !body.email || !body.location || !body.bio) {

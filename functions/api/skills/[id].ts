@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { badRequest, json, notFound } from '../../_shared';
+import { badRequest, json, notFound, requireAuth } from '../../_shared';
 
 function mapSkill(row: any) {
   return {
@@ -14,6 +14,9 @@ function mapSkill(row: any) {
 }
 
 export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, params, request }) => {
+  const authError = await requireAuth(env, request);
+  if (authError) return authError;
+
   const id = Number(params.id);
   if (!id) return badRequest('Invalid skill id');
 
@@ -41,7 +44,10 @@ export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async 
   return json(mapSkill(updated));
 };
 
-export const onRequestDelete: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, params }) => {
+export const onRequestDelete: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, params, request }) => {
+  const authError = await requireAuth(env, request);
+  if (authError) return authError;
+
   const id = Number(params.id);
   if (!id) return badRequest('Invalid skill id');
 

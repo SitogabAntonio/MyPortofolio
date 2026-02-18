@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { badRequest, json, safeJsonArray } from '../_shared';
+import { badRequest, json, requireAuth, safeJsonArray } from '../_shared';
 
 function mapExperience(row: any, technologies: string[]) {
   return {
@@ -38,6 +38,9 @@ export const onRequestGet: PagesFunction<{ portofolio_db: D1Database }> = async 
 };
 
 export const onRequestPost: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, request }) => {
+  const authError = await requireAuth(env, request);
+  if (authError) return authError;
+
   const body = await request.json<any>();
 
   if (!body.company || !body.position || !body.location || !body.startDate || !body.description) {

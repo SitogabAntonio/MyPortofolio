@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import { appThemes } from './theme-options.js';
+
 export default {
   content: [
     "./index.html",
@@ -37,4 +39,5 @@ export default {
     },
   },
   plugins: [],
+  appThemes,
 }

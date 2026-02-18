@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { badRequest, json } from '../_shared';
+import { badRequest, json, requireAuth } from '../_shared';
 
 function mapSkill(row: any) {
   return {
@@ -21,6 +21,9 @@ export const onRequestGet: PagesFunction<{ portofolio_db: D1Database }> = async 
 };
 
 export const onRequestPost: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, request }) => {
+  const authError = await requireAuth(env, request);
+  if (authError) return authError;
+
   const body = await request.json<any>();
   if (!body.name) return badRequest('name wajib diisi');
 

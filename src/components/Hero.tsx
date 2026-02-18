@@ -4,7 +4,7 @@ import { api } from '../lib/api';
 import type { Experience, ProfileInfo, Project, Skill } from '../lib/types';
 
 function SkeletonCard() {
-  return <div className="h-40 animate-pulse rounded-xl border border-neutral-800 bg-neutral-900/60" />;
+  return <div className="h-52 animate-pulse rounded-xl border border-neutral-800 bg-[var(--surface)]/70" />;
 }
 
 export default function Hero() {
@@ -13,6 +13,7 @@ export default function Hero() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [slideIndex, setSlideIndex] = useState<Record<string, number>>({});
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -47,41 +48,58 @@ export default function Hero() {
 
     gsap.fromTo(
       containerRef.current.querySelectorAll('.reveal-item'),
-      { y: 18, opacity: 0 },
-      { y: 0, opacity: 1, stagger: 0.08, duration: 0.7, ease: 'power3.out' },
+      { y: 28, opacity: 0 },
+      { y: 0, opacity: 1, stagger: 0.08, duration: 0.75, ease: 'power3.out' },
+    );
+
+    gsap.fromTo(
+      containerRef.current.querySelectorAll('.project-card'),
+      { y: 32, opacity: 0 },
+      { y: 0, opacity: 1, stagger: 0.12, duration: 0.8, ease: 'power2.out', delay: 0.2 },
     );
   }, [loading]);
 
   const topProjects = useMemo(() => projects.slice(0, 4), [projects]);
 
+  const getProjectImages = (project: Project) => {
+    const images = (project.imageUrls ?? []).filter(Boolean);
+    if (images.length) return images.slice(0, 3);
+    if (project.imageUrl) return [project.imageUrl];
+    return ['https://picsum.photos/seed/project/700/420'];
+  };
+
+  const slide = (projectId: string, total: number, direction: 1 | -1) => {
+    setSlideIndex((prev) => {
+      const current = prev[projectId] ?? 0;
+      return { ...prev, [projectId]: (current + direction + total) % total };
+    });
+  };
+
   return (
-    <div ref={containerRef} className="bg-neutral-950 text-neutral-100">
+    <div ref={containerRef} className="text-neutral-100">
       <section className="relative min-h-screen overflow-hidden px-6 pb-20 pt-36 md:px-12 lg:px-16">
-        <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-950 to-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_40%)]" />
         <div className="relative mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[1fr_320px]">
           <div className="space-y-8">
             <div className="reveal-item text-xs uppercase tracking-[0.24em] text-neutral-500">Portfolio — 2026</div>
             <h1 className="reveal-item text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
               {profile?.name ? `Halo, saya ${profile.name}` : 'Halo, saya Developer'}
             </h1>
-            <p className="reveal-item max-w-2xl text-lg text-neutral-400">
+            <p className="reveal-item max-w-2xl text-lg text-neutral-300">
               {profile?.tagline ?? 'Full-Stack Developer'}
-              <span className="mt-2 block text-neutral-500">
-                {profile?.bio ?? 'Menyiapkan pengalaman digital yang cepat, modern, dan scalable.'}
-              </span>
             </p>
             <div className="reveal-item flex flex-wrap gap-3">
-              <a href="#projects" className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200">
-                Lihat Projects
+              <a href="#about" className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-neutral-950">
+                Tentang Saya
               </a>
-              <a href="#skills" className="rounded-xl border border-neutral-700 px-6 py-3 text-sm font-semibold text-neutral-300 transition hover:border-neutral-500 hover:text-white">
-                Lihat Skills
+              <a href="#projects" className="rounded-xl border border-neutral-700 px-6 py-3 text-sm font-semibold text-neutral-300">
+                Lihat Projects
               </a>
             </div>
           </div>
 
-          <div className="reveal-item rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4">
-            <div className="h-[360px] overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950">
+          <div className="reveal-item rounded-2xl border border-neutral-800 bg-[var(--surface)]/70 p-4">
+            <div className="h-[360px] overflow-hidden rounded-xl border border-neutral-800 bg-[var(--surface)]/80">
               {profile?.avatarUrl ? (
                 <img src={profile.avatarUrl} alt={profile.name} className="h-full w-full object-cover" />
               ) : (
@@ -92,46 +110,75 @@ export default function Hero() {
         </div>
       </section>
 
+      <section id="about" className="px-6 pb-24 md:px-12 lg:px-16">
+        <div className="mx-auto max-w-7xl rounded-2xl border border-neutral-800 bg-[var(--surface)]/60 p-6 md:p-8 reveal-item">
+          <h2 className="text-3xl font-semibold text-white">Tentang Saya</h2>
+          <p className="mt-4 max-w-3xl text-neutral-300">
+            {profile?.bio ??
+              'Saya adalah developer yang passionate di frontend & backend, suka membangun aplikasi yang scalable dan user-friendly.'}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-5 text-sm text-neutral-400">
+            <span>Email: {profile?.email || '-'}</span>
+            <span>Lokasi: {profile?.location || '-'}</span>
+          </div>
+        </div>
+      </section>
+
       <section id="projects" className="px-6 pb-24 md:px-12 lg:px-16">
         <div className="mx-auto max-w-7xl space-y-5">
           <h2 className="reveal-item text-2xl font-semibold text-white">Projects</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {loading && Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
             {!loading && !topProjects.length && (
-              <div className="reveal-item rounded-xl border border-neutral-800 bg-neutral-900/60 p-5 text-sm text-neutral-500">
+              <div className="reveal-item rounded-xl border border-neutral-800 bg-[var(--surface)]/60 p-5 text-sm text-neutral-500">
                 Belum ada project. Tambahkan dari admin panel.
               </div>
             )}
-            {topProjects.map((project) => (
-              <article
-                key={project.id}
-                className="reveal-item rounded-xl border border-neutral-800 bg-neutral-900/60 p-5 transition hover:-translate-y-0.5 hover:border-neutral-600"
-              >
-                <div className="overflow-hidden rounded-lg border border-neutral-800">
-                  <img
-                    src={project.imageUrl || project.imageUrls?.[0] || 'https://picsum.photos/seed/project/700/420'}
-                    alt={project.title}
-                    className="h-44 w-full object-cover transition duration-500 hover:scale-105"
-                  />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-white">{project.title}</h3>
-                <p className="mt-2 line-clamp-3 text-sm text-neutral-400">{project.description}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {project.tags.map((tag) => (
-                    <span key={tag} className="rounded-md bg-neutral-800 px-2 py-1 text-xs text-neutral-300">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </article>
-            ))}
+            {topProjects.map((project) => {
+              const images = getProjectImages(project);
+              const current = slideIndex[project.id] ?? 0;
+              return (
+                <article key={project.id} className="project-card rounded-xl border border-neutral-800 bg-[var(--surface)]/60 p-5">
+                  <div className="relative overflow-hidden rounded-lg border border-neutral-800">
+                    <img src={images[current]} alt={project.title} className="h-52 w-full object-cover" />
+                    {images.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => slide(project.id, images.length, -1)}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full border border-neutral-700 bg-black/40 px-2 py-1 text-xs text-white"
+                        >
+                          ←
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => slide(project.id, images.length, 1)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-neutral-700 bg-black/40 px-2 py-1 text-xs text-white"
+                        >
+                          →
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold text-white">{project.title}</h3>
+                  <p className="mt-2 line-clamp-3 text-sm text-neutral-300">{project.description}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {project.tags.map((tag) => (
+                      <span key={tag} className="rounded-md bg-neutral-800 px-2 py-1 text-xs text-neutral-300">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
 
       <section id="skills" className="px-6 pb-24 md:px-12 lg:px-16">
         <div className="mx-auto grid max-w-7xl gap-4 lg:grid-cols-2">
-          <article className="reveal-item rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5">
+          <article className="reveal-item rounded-2xl border border-neutral-800 bg-[var(--surface)]/60 p-5">
             <h3 className="mb-3 text-xl font-semibold text-white">Skills</h3>
             {loading ? (
               <div className="space-y-2">
@@ -152,7 +199,7 @@ export default function Hero() {
             )}
           </article>
 
-          <article className="reveal-item rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5">
+          <article className="reveal-item rounded-2xl border border-neutral-800 bg-[var(--surface)]/60 p-5">
             <h3 className="mb-3 text-xl font-semibold text-white">Experiences</h3>
             {loading ? (
               <div className="space-y-2">

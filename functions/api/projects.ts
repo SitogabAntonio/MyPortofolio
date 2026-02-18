@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { badRequest, json, safeJsonArray, toBool } from '../_shared';
+import { badRequest, json, requireAuth, safeJsonArray, toBool } from '../_shared';
 
 async function listTags(env: any, projectId: number) {
   const tags = await env.portofolio_db
@@ -43,11 +43,20 @@ export const onRequestGet: PagesFunction<{ portofolio_db: D1Database }> = async 
 };
 
 export const onRequestPost: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, request }) => {
+  const authError = await requireAuth(env, request);
+  if (authError) return authError;
+
   const body = await request.json<any>();
 
   if (!body.title || !body.description || !body.startDate) {
     return badRequest('title, description, startDate wajib diisi');
   }
+
+  const rawImages = Array.isArray(body.imageUrls) ? body.imageUrls.filter(Boolean) : [];
+  if (rawImages.length > 3) {
+    return badRequest('Maksimal 3 gambar per project');
+  }
+  const imageUrls = rawImages.slice(0, 3).map(String);
 
   const inserted = await env.portofolio_db
     .prepare(
@@ -60,8 +69,8 @@ export const onRequestPost: PagesFunction<{ portofolio_db: D1Database }> = async
       body.title,
       body.description,
       body.longDescription ?? null,
-      body.imageUrl ?? null,
-      JSON.stringify(body.imageUrls ?? []),
+      imageUrls[0] ?? null,
+      JSON.stringify(imageUrls),
       body.demoUrl ?? null,
       body.githubUrl ?? null,
       body.category ?? 'web',
@@ -76,6 +85,10 @@ export const onRequestPost: PagesFunction<{ portofolio_db: D1Database }> = async
   const tags = Array.isArray(body.tags) ? body.tags : [];
   for (const tag of tags) {
     if (!tag) continue;
+    await env.portofolio_db
+      .prepare('INSERT OR IGNORE INTO tags (name, created_at, updated_at) VALUES (?, datetime(\'now\'), datetime(\'now\'))')
+      .bind(String(tag))
+      .run();
     await env.portofolio_db
       .prepare('INSERT INTO project_tags (project_id, tag) VALUES (?, ?)')
       .bind(projectId, String(tag))

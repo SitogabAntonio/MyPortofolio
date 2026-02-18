@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { badRequest, json, notFound, safeJsonArray, toBool } from '../../_shared';
+import { badRequest, json, notFound, requireAuth, safeJsonArray, toBool } from '../../_shared';
 
 async function listTags(env: any, projectId: number) {
   const tags = await env.portofolio_db
@@ -31,6 +31,9 @@ async function mapProject(env: any, row: any) {
 }
 
 export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, params, request }) => {
+  const authError = await requireAuth(env, request);
+  if (authError) return authError;
+
   const id = Number(params.id);
   if (!id) return badRequest('Invalid project id');
 
@@ -38,6 +41,9 @@ export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async 
   if (!row) return notFound('Project tidak ditemukan');
 
   const body = await request.json<any>();
+  const imageUrls = Array.isArray(body.imageUrls)
+    ? body.imageUrls.filter(Boolean).slice(0, 3).map(String)
+    : safeJsonArray(row.image_urls).slice(0, 3);
 
   await env.portofolio_db
     .prepare(
@@ -51,8 +57,8 @@ export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async 
       body.title ?? row.title,
       body.description ?? row.description,
       body.longDescription ?? row.long_description,
-      body.imageUrl ?? row.image_url,
-      JSON.stringify(body.imageUrls ?? safeJsonArray(row.image_urls)),
+      imageUrls[0] ?? null,
+      JSON.stringify(imageUrls),
       body.demoUrl ?? row.demo_url,
       body.githubUrl ?? row.github_url,
       body.category ?? row.category,
@@ -69,6 +75,10 @@ export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async 
     for (const tag of body.tags) {
       if (!tag) continue;
       await env.portofolio_db
+        .prepare('INSERT OR IGNORE INTO tags (name, created_at, updated_at) VALUES (?, datetime(\'now\'), datetime(\'now\'))')
+        .bind(String(tag))
+        .run();
+      await env.portofolio_db
         .prepare('INSERT INTO project_tags (project_id, tag) VALUES (?, ?)')
         .bind(id, String(tag))
         .run();
@@ -79,7 +89,10 @@ export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async 
   return json(await mapProject(env, updated));
 };
 
-export const onRequestDelete: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, params }) => {
+export const onRequestDelete: PagesFunction<{ portofolio_db: D1Database }> = async ({ env, params, request }) => {
+  const authError = await requireAuth(env, request);
+  if (authError) return authError;
+
   const id = Number(params.id);
   if (!id) return badRequest('Invalid project id');
 

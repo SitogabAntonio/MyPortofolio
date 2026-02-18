@@ -7,15 +7,19 @@ import type {
   ProjectFormData,
   Skill,
   SkillFormData,
+  Tag,
+  UserSession,
 } from './types';
 
 type ApiMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 async function request<T>(path: string, method: ApiMethod = 'GET', body?: unknown): Promise<T> {
+  const token = localStorage.getItem('admin_token');
   const response = await fetch(`/api${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -31,6 +35,11 @@ async function request<T>(path: string, method: ApiMethod = 'GET', body?: unknow
 export const api = {
   health: () => request<{ ok: boolean }>('/health'),
 
+  login: (username: string, password: string) =>
+    request<{ token: string; user: UserSession }>('/auth/login', 'POST', { username, password }),
+  getMe: () => request<UserSession>('/auth/me'),
+  logout: () => request<{ success: boolean }>('/auth/logout', 'POST'),
+
   getOverview: () => request<DashboardOverview>('/overview'),
 
   getProfile: () => request<ProfileInfo>('/profile'),
@@ -41,6 +50,11 @@ export const api = {
   updateProject: (id: string, payload: Partial<ProjectFormData>) =>
     request<Project>(`/projects/${id}`, 'PUT', payload),
   deleteProject: (id: string) => request<{ success: boolean }>(`/projects/${id}`, 'DELETE'),
+
+  getTags: () => request<Tag[]>('/tags'),
+  createTag: (name: string) => request<Tag>('/tags', 'POST', { name }),
+  updateTag: (id: string, name: string) => request<Tag>(`/tags/${id}`, 'PUT', { name }),
+  deleteTag: (id: string) => request<{ success: boolean }>(`/tags/${id}`, 'DELETE'),
 
   getExperiences: () => request<Experience[]>('/experiences'),
   createExperience: (payload: ExperienceFormData) =>

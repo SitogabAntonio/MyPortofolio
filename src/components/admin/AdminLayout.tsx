@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { api } from '../../lib/api';
 
 type AdminNavItem = {
   label: string;
@@ -47,6 +48,16 @@ const navItems: AdminNavItem[] = [
     ),
   },
   {
+    label: 'Tags',
+    path: '/admin/tags',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="m7 7 5-5 10 10-5 5L7 7Z" />
+        <path d="M7 7H2v5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
     label: 'Settings',
     path: '/admin/settings',
     icon: (
@@ -60,16 +71,28 @@ const navItems: AdminNavItem[] = [
 
 export default function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const onLogout = async () => {
+    try {
+      await api.logout();
+    } catch {
+      // ignore network errors on logout
+    } finally {
+      localStorage.removeItem('admin_token');
+      navigate('/admin/login', { replace: true });
+    }
+  };
 
   const currentTitle =
     navItems.find((item) => location.pathname.startsWith(item.path))?.label ?? 'Admin';
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-[var(--bg)] text-neutral-100">
       <div className="mx-auto grid min-h-screen max-w-[1600px] lg:grid-cols-[260px_1fr]">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-[260px] border-r border-neutral-800 bg-neutral-950/95 p-6 transition-transform duration-300 lg:static lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-40 w-[260px] border-r border-neutral-800 bg-[var(--surface)]/90 p-6 transition-transform duration-300 lg:static lg:translate-x-0 ${
             menuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
@@ -109,7 +132,7 @@ export default function AdminLayout() {
         </aside>
 
         <div className="relative flex min-h-screen flex-col">
-          <header className="sticky top-0 z-30 border-b border-neutral-800 bg-neutral-950/90 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-30 border-b border-neutral-800 bg-[var(--surface)]/90 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <button
@@ -133,6 +156,13 @@ export default function AdminLayout() {
               >
                 Lihat Website
               </NavLink>
+              <button
+                type="button"
+                onClick={() => void onLogout()}
+                className="rounded-lg border border-red-700/60 px-3 py-2 text-sm text-red-300 transition hover:bg-red-500/10"
+              >
+                Logout
+              </button>
             </div>
           </header>
 
