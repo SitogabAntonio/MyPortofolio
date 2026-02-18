@@ -1,5 +1,5 @@
 // src/lib/mockData.ts
-import type { Project, Skill, Experience, ContactMessage, ProfileInfo } from './types';
+import type { Experience, ProfileInfo, Project, Skill } from './types';
 
 export const mockProfile: ProfileInfo = {
   name: 'Nio',
@@ -127,16 +127,16 @@ export const mockProjects: Project[] = [
 ];
 
 export const mockSkills: Skill[] = [
-  { id: '1', name: 'React', category: 'frontend', proficiency: 95, yearsOfExperience: 4, createdAt: '2023-01-01T00:00:00Z' },
-  { id: '2', name: 'TypeScript', category: 'frontend', proficiency: 90, yearsOfExperience: 3, createdAt: '2023-01-01T00:00:00Z' },
-  { id: '3', name: 'Next.js', category: 'frontend', proficiency: 85, yearsOfExperience: 2, createdAt: '2023-01-01T00:00:00Z' },
-  { id: '4', name: 'Tailwind CSS', category: 'frontend', proficiency: 95, yearsOfExperience: 3, createdAt: '2023-01-01T00:00:00Z' },
-  { id: '5', name: 'Node.js', category: 'backend', proficiency: 85, yearsOfExperience: 4, createdAt: '2023-01-01T00:00:00Z' },
-  { id: '6', name: 'PostgreSQL', category: 'backend', proficiency: 80, yearsOfExperience: 3, createdAt: '2023-01-01T00:00:00Z' },
-  { id: '7', name: 'MongoDB', category: 'backend', proficiency: 75, yearsOfExperience: 2, createdAt: '2023-01-01T00:00:00Z' },
-  { id: '8', name: 'Docker', category: 'devops', proficiency: 70, yearsOfExperience: 2, createdAt: '2023-01-01T00:00:00Z' },
-  { id: '9', name: 'AWS', category: 'devops', proficiency: 65, yearsOfExperience: 2, createdAt: '2023-01-01T00:00:00Z' },
-  { id: '10', name: 'Figma', category: 'design', proficiency: 75, yearsOfExperience: 3, createdAt: '2023-01-01T00:00:00Z' }
+  { id: '1', name: 'React', category: 'frontend', yearsOfExperience: 4, createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
+  { id: '2', name: 'TypeScript', category: 'frontend', yearsOfExperience: 3, createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
+  { id: '3', name: 'Next.js', category: 'frontend', yearsOfExperience: 2, createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
+  { id: '4', name: 'Tailwind CSS', category: 'frontend', yearsOfExperience: 3, createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
+  { id: '5', name: 'Node.js', category: 'backend', yearsOfExperience: 4, createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
+  { id: '6', name: 'PostgreSQL', category: 'backend', yearsOfExperience: 3, createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
+  { id: '7', name: 'MongoDB', category: 'backend', yearsOfExperience: 2, createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
+  { id: '8', name: 'Docker', category: 'devops', yearsOfExperience: 2, createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
+  { id: '9', name: 'AWS', category: 'devops', yearsOfExperience: 2, createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
+  { id: '10', name: 'Figma', category: 'design', yearsOfExperience: 3, createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' }
 ];
 
 export const mockExperiences: Experience[] = [
@@ -189,36 +189,5 @@ export const mockExperiences: Experience[] = [
     ],
     technologies: ['React', 'PHP', 'MySQL', 'WordPress'],
     createdAt: '2019-01-01T00:00:00Z'
-  }
-];
-
-export const mockContactMessages: ContactMessage[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    subject: 'Project Inquiry',
-    message: 'Hi, I would like to discuss a potential project opportunity with you.',
-    status: 'unread',
-    createdAt: '2024-02-17T10:30:00Z'
-  },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    email: 'jane@company.com',
-    subject: 'Collaboration',
-    message: 'We are looking for a developer to join our team on a contract basis.',
-    status: 'read',
-    createdAt: '2024-02-16T14:20:00Z'
-  },
-  {
-    id: '3',
-    name: 'Mike Johnson',
-    email: 'mike@startup.io',
-    subject: 'Technical Question',
-    message: 'I saw your e-commerce project. Could you provide more details about the tech stack?',
-    status: 'replied',
-    createdAt: '2024-02-15T09:15:00Z',
-    repliedAt: '2024-02-15T16:45:00Z'
   }
 ];

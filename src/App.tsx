@@ -1,27 +1,38 @@
-// src/App.tsx
-import Hero from './components/Hero';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import AdminLayout from './components/admin/AdminLayout';
 import Navbar from './components/Navbar';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminExperiencesPage from './pages/admin/AdminExperiencesPage';
+import AdminProjectsPage from './pages/admin/AdminProjectsPage';
+import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+import AdminSkillsPage from './pages/admin/AdminSkillsPage';
+import NotFoundPage from './pages/NotFoundPage';
+import HomePage from './pages/public/HomePage';
 
 function App() {
   return (
-    <main className="min-h-screen">
-      <Navbar />
-      <Hero />
+    <Routes>
+      <Route
+        path="/"
+        element={(
+          <main className="min-h-screen bg-neutral-950">
+            <Navbar />
+            <HomePage />
+          </main>
+        )}
+      />
 
-      {/* Placeholder section lain nanti */}
-      <section id="about" className="py-24 bg-gray-900/50">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8">Tentang Saya</h2>
-          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-            {/* Isi deskripsi singkat tentang dirimu */}
-            Saya adalah developer yang passionate di frontend & backend,
-            suka membangun aplikasi yang scalable dan user-friendly.
-          </p>
-        </div>
-      </section>
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboardPage />} />
+        <Route path="projects" element={<AdminProjectsPage />} />
+        <Route path="experiences" element={<AdminExperiencesPage />} />
+        <Route path="skills" element={<AdminSkillsPage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
+      </Route>
 
-      {/* Tambah section Projects, Skills, Contact nanti */}
-    </main>
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
 

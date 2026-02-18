@@ -23,10 +23,10 @@ export interface Skill {
   id: string;
   name: string;
   category: 'frontend' | 'backend' | 'devops' | 'design' | 'other';
-  proficiency: number; // 0-100
   icon?: string;
   yearsOfExperience: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Experience {
@@ -43,18 +43,8 @@ export interface Experience {
   createdAt: string;
 }
 
-export interface ContactMessage {
-  id: string;
-  name: string;
-  email: string;
-  subject?: string;
-  message: string;
-  status: 'unread' | 'read' | 'replied' | 'archived';
-  createdAt: string;
-  repliedAt?: string;
-}
-
 export interface ProfileInfo {
+  id?: string;
   name: string;
   tagline: string;
   bio: string;
@@ -88,5 +78,12 @@ export interface PaginatedResponse<T> {
 
 // Form types
 export type ProjectFormData = Omit<Project, 'id' | 'createdAt' | 'updatedAt'>;
-export type SkillFormData = Omit<Skill, 'id' | 'createdAt'>;
+export type SkillFormData = Omit<Skill, 'id' | 'createdAt' | 'updatedAt'>;
 export type ExperienceFormData = Omit<Experience, 'id' | 'createdAt'>;
+
+export interface DashboardOverview {
+  totalProjects: number;
+  activeProjects: number;
+  totalExperiences: number;
+  totalSkills: number;
+}
