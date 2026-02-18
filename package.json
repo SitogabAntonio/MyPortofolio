@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && pnpm run deploy:main",
+    "build": "vite build",
     "build:local": "vite build",
     "deploy:main": "npx wrangler pages deploy dist --project-name myportofolio --branch main",
+    "build:deploy": "vite build && pnpm run deploy:main",
     "lint": "eslint .",
     "preview": "vite preview"
   },
