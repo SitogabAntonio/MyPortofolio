@@ -1,13 +1,21 @@
 import { useEffect, useState } from 'react';
+import { useToast } from '../../components/shared/ToastProvider';
 import { api } from '../../lib/api';
 import type { Tag } from '../../lib/types';
 
 export default function AdminTagsPage() {
+  const toast = useToast();
   const [items, setItems] = useState<Tag[]>([]);
   const [name, setName] = useState('');
   const [editing, setEditing] = useState<Tag | null>(null);
 
-  const load = async () => setItems(await api.getTags());
+  const load = async () => {
+    try {
+      setItems(await api.getTags());
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal memuat tags');
+    }
+  };
 
   useEffect(() => {
     void load();
@@ -16,11 +24,20 @@ export default function AdminTagsPage() {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!name.trim()) return;
-    if (editing) await api.updateTag(editing.id, name.trim());
-    else await api.createTag(name.trim());
-    setName('');
-    setEditing(null);
-    await load();
+    try {
+      if (editing) {
+        await api.updateTag(editing.id, name.trim());
+        toast.success('Tag berhasil diperbarui');
+      } else {
+        await api.createTag(name.trim());
+        toast.success('Tag berhasil ditambahkan');
+      }
+      setName('');
+      setEditing(null);
+      await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal menyimpan tag');
+    }
   };
 
   const onEdit = (tag: Tag) => {
@@ -67,7 +84,20 @@ export default function AdminTagsPage() {
               <button onClick={() => onEdit(tag)} className="rounded-lg border border-neutral-700 px-3 py-1 text-xs">
                 Edit
               </button>
-              <button onClick={() => void api.deleteTag(tag.id).then(load)} className="rounded-lg border border-red-700/60 px-3 py-1 text-xs text-red-300">
+              <button
+                onClick={() => {
+                  void api
+                    .deleteTag(tag.id)
+                    .then(async () => {
+                      toast.success('Tag berhasil dihapus');
+                      await load();
+                    })
+                    .catch((err: unknown) => {
+                      toast.error(err instanceof Error ? err.message : 'Gagal menghapus tag');
+                    });
+                }}
+                className="rounded-lg border border-red-700/60 px-3 py-1 text-xs text-red-300"
+              >
                 Hapus
               </button>
             </div>

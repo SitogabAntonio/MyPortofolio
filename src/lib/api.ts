@@ -1,7 +1,11 @@
 import type {
+  Certificate,
+  CertificateFormData,
   DashboardOverview,
   Experience,
   ExperienceFormData,
+  Gallery,
+  GalleryFormData,
   ProfileInfo,
   Project,
   ProjectFormData,
@@ -26,7 +30,14 @@ async function request<T>(path: string, method: ApiMethod = 'GET', body?: unknow
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(text || `Request failed: ${response.status}`);
+    let message = text;
+    try {
+      const parsed = JSON.parse(text) as { error?: string; message?: string };
+      message = parsed.error || parsed.message || text;
+    } catch {
+      // keep fallback text message
+    }
+    throw new Error(message || `Request failed: ${response.status}`);
   }
 
   return response.json() as Promise<T>;
@@ -68,4 +79,18 @@ export const api = {
   updateSkill: (id: string, payload: Partial<SkillFormData>) =>
     request<Skill>(`/skills/${id}`, 'PUT', payload),
   deleteSkill: (id: string) => request<{ success: boolean }>(`/skills/${id}`, 'DELETE'),
+
+  getGalleries: () => request<Gallery[]>('/galleries'),
+  createGallery: (payload: GalleryFormData) => request<Gallery>('/galleries', 'POST', payload),
+  updateGallery: (id: string, payload: Partial<GalleryFormData>) =>
+    request<Gallery>(`/galleries/${id}`, 'PUT', payload),
+  deleteGallery: (id: string) => request<{ success: boolean }>(`/galleries/${id}`, 'DELETE'),
+
+  getCertificates: () => request<Certificate[]>('/certificates'),
+  createCertificate: (payload: CertificateFormData) =>
+    request<Certificate>('/certificates', 'POST', payload),
+  updateCertificate: (id: string, payload: Partial<CertificateFormData>) =>
+    request<Certificate>(`/certificates/${id}`, 'PUT', payload),
+  deleteCertificate: (id: string) =>
+    request<{ success: boolean }>(`/certificates/${id}`, 'DELETE'),
 };

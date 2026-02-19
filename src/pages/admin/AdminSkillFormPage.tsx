@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useToast } from '../../components/shared/ToastProvider';
 import { api } from '../../lib/api';
 import type { SkillFormData } from '../../lib/types';
 
 export default function AdminSkillFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [form, setForm] = useState<SkillFormData>({
     name: '',
     category: 'frontend',
@@ -17,25 +19,38 @@ export default function AdminSkillFormPage() {
   useEffect(() => {
     const load = async () => {
       if (!id) return;
-      const skills = await api.getSkills();
-      const skill = skills.find((item) => item.id === id);
-      if (!skill) return;
-      setForm({
-        name: skill.name,
-        category: skill.category,
-        yearsOfExperience: skill.yearsOfExperience,
-        icon: skill.icon ?? '',
-      });
+      try {
+        const skills = await api.getSkills();
+        const skill = skills.find((item) => item.id === id);
+        if (!skill) return;
+        setForm({
+          name: skill.name,
+          category: skill.category,
+          yearsOfExperience: skill.yearsOfExperience,
+          icon: skill.icon ?? '',
+        });
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Gagal memuat skill');
+      }
     };
 
     void load().finally(() => setLoading(false));
-  }, [id]);
+  }, [id, toast]);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (id) await api.updateSkill(id, form);
-    else await api.createSkill(form);
-    navigate('/admin/skills');
+    try {
+      if (id) {
+        await api.updateSkill(id, form);
+        toast.success('Skill berhasil diperbarui');
+      } else {
+        await api.createSkill(form);
+        toast.success('Skill berhasil ditambahkan');
+      }
+      navigate('/admin/skills');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal menyimpan skill');
+    }
   };
 
   if (loading) return <p className="text-sm text-neutral-500">Memuat form...</p>;
@@ -49,14 +64,26 @@ export default function AdminSkillFormPage() {
         </Link>
       </div>
       <form onSubmit={submit} className="grid gap-3 md:grid-cols-2">
-        <input value={form.name} onChange={(e) => setForm((v) => ({ ...v, name: e.target.value }))} placeholder="Skill Name" className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
-        <select value={form.category} onChange={(e) => setForm((v) => ({ ...v, category: e.target.value as SkillFormData['category'] }))} className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2">
-          {['frontend', 'backend', 'devops', 'design', 'other'].map((value) => (
-            <option key={value} value={value}>{value}</option>
-          ))}
-        </select>
-        <input type="number" min={0} value={form.yearsOfExperience} onChange={(e) => setForm((v) => ({ ...v, yearsOfExperience: Number(e.target.value) }))} placeholder="Years of Experience" className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
-        <input value={form.icon ?? ''} onChange={(e) => setForm((v) => ({ ...v, icon: e.target.value }))} placeholder="Icon URL (optional)" className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Nama Skill</span>
+          <input value={form.name} onChange={(e) => setForm((v) => ({ ...v, name: e.target.value }))} placeholder="Skill Name" className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        </label>
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Kategori</span>
+          <select value={form.category} onChange={(e) => setForm((v) => ({ ...v, category: e.target.value as SkillFormData['category'] }))} className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2">
+            {['frontend', 'backend', 'devops', 'design', 'other'].map((value) => (
+              <option key={value} value={value}>{value}</option>
+            ))}
+          </select>
+        </label>
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Years of Experience</span>
+          <input type="number" min={0} value={form.yearsOfExperience} onChange={(e) => setForm((v) => ({ ...v, yearsOfExperience: Number(e.target.value) }))} placeholder="Years of Experience" className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        </label>
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Icon URL (opsional)</span>
+          <input value={form.icon ?? ''} onChange={(e) => setForm((v) => ({ ...v, icon: e.target.value }))} placeholder="Icon URL (optional)" className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        </label>
         <div className="md:col-span-2 flex gap-2">
           <button className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-neutral-200">{id ? 'Update' : 'Simpan'}</button>
           <Link to="/admin/skills" className="rounded-lg border border-neutral-700 px-4 py-2 text-sm">Batal</Link>

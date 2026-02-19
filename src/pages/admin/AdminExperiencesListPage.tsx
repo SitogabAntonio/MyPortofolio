@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useToast } from '../../components/shared/ToastProvider';
 import { api } from '../../lib/api';
 import type { Experience } from '../../lib/types';
 
 export default function AdminExperiencesListPage() {
+  const toast = useToast();
   const [items, setItems] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -11,6 +13,8 @@ export default function AdminExperiencesListPage() {
     setLoading(true);
     try {
       setItems(await api.getExperiences());
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal memuat experience');
     } finally {
       setLoading(false);
     }
@@ -21,8 +25,13 @@ export default function AdminExperiencesListPage() {
   }, []);
 
   const removeItem = async (id: string) => {
-    await api.deleteExperience(id);
-    await loadData();
+    try {
+      await api.deleteExperience(id);
+      toast.success('Experience berhasil dihapus');
+      await loadData();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal menghapus experience');
+    }
   };
 
   return (

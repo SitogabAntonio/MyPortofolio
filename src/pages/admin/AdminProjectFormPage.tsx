@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useToast } from '../../components/shared/ToastProvider';
 import { api } from '../../lib/api';
 import type { ProjectFormData, Tag } from '../../lib/types';
 
@@ -22,6 +23,7 @@ const emptyForm = (): ProjectFormData => ({
 export default function AdminProjectFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const isEdit = Boolean(id);
 
   const [form, setForm] = useState<ProjectFormData>(emptyForm());
@@ -33,40 +35,47 @@ export default function AdminProjectFormPage() {
 
   useEffect(() => {
     const load = async () => {
-      const tags = await api.getTags();
-      setAllTags(tags);
+      try {
+        const tags = await api.getTags();
+        setAllTags(tags);
 
-      if (!id) return;
+        if (!id) return;
 
-      const projects = await api.getProjects();
-      const project = projects.find((item) => item.id === id);
-      if (!project) return;
+        const projects = await api.getProjects();
+        const project = projects.find((item) => item.id === id);
+        if (!project) return;
 
-      setForm({
-        title: project.title,
-        description: project.description,
-        longDescription: project.longDescription ?? '',
-        imageUrl: project.imageUrl,
-        imageUrls: project.imageUrls ?? [],
-        demoUrl: project.demoUrl ?? '',
-        githubUrl: project.githubUrl ?? '',
-        tags: project.tags,
-        category: project.category,
-        featured: project.featured,
-        status: project.status,
-        startDate: project.startDate,
-        endDate: project.endDate ?? '',
-      });
-      setLoading(false);
+        setForm({
+          title: project.title,
+          description: project.description,
+          longDescription: project.longDescription ?? '',
+          imageUrl: project.imageUrl,
+          imageUrls: project.imageUrls ?? [],
+          demoUrl: project.demoUrl ?? '',
+          githubUrl: project.githubUrl ?? '',
+          tags: project.tags,
+          category: project.category,
+          featured: project.featured,
+          status: project.status,
+          startDate: project.startDate,
+          endDate: project.endDate ?? '',
+        });
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Gagal memuat data project');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    void load().finally(() => setLoading(false));
-  }, [id]);
+    void load();
+  }, [id, toast]);
 
   const filteredTags = useMemo(() => {
     const q = tagQuery.toLowerCase();
-    return allTags.filter((tag) => tag.name.toLowerCase().includes(q));
-  }, [allTags, tagQuery]);
+    return allTags.filter(
+      (tag) => tag.name.toLowerCase().includes(q) && !form.tags.includes(tag.name),
+    );
+  }, [allTags, form.tags, tagQuery]);
 
   const addTag = (value: string) => {
     const tag = value.trim();
@@ -129,9 +138,16 @@ export default function AdminProjectFormPage() {
         imageUrls: (form.imageUrls ?? []).slice(0, 3),
         imageUrl: (form.imageUrls ?? [])[0] ?? '',
       };
-      if (id) await api.updateProject(id, payload);
-      else await api.createProject(payload);
+      if (id) {
+        await api.updateProject(id, payload);
+        toast.success('Project berhasil diperbarui');
+      } else {
+        await api.createProject(payload);
+        toast.success('Project berhasil ditambahkan');
+      }
       navigate('/admin/projects');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal menyimpan project');
     } finally {
       setSaving(false);
     }
@@ -217,7 +233,10 @@ export default function AdminProjectFormPage() {
 
         <div className="md:col-span-2 rounded-xl border border-neutral-700 bg-neutral-950 p-3">
           <p className="mb-2 text-xs uppercase tracking-[0.16em] text-neutral-500">Upload gambar lokal (max 3)</p>
-          <input type="file" accept="image/*" multiple onChange={onImageChange} className="text-sm text-neutral-300" />
+          <label className="inline-flex cursor-pointer items-center rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 hover:border-neutral-500">
+            Choose Files
+            <input type="file" accept="image/*" multiple onChange={onImageChange} className="hidden" />
+          </label>
           <div className="mt-3 grid gap-2 sm:grid-cols-3">
             {(form.imageUrls ?? []).map((url, index) => (
               <div key={`${url.slice(0, 20)}-${index}`} className="rounded-lg border border-neutral-700 p-2">

@@ -5,6 +5,10 @@ import Navbar from './components/Navbar';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminExperienceFormPage from './pages/admin/AdminExperienceFormPage';
 import AdminExperiencesListPage from './pages/admin/AdminExperiencesListPage';
+import AdminCertificateFormPage from './pages/admin/AdminCertificateFormPage';
+import AdminCertificatesListPage from './pages/admin/AdminCertificatesListPage';
+import AdminGalleryFormPage from './pages/admin/AdminGalleryFormPage';
+import AdminGalleriesListPage from './pages/admin/AdminGalleriesListPage';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminProjectFormPage from './pages/admin/AdminProjectFormPage';
 import AdminProjectsListPage from './pages/admin/AdminProjectsListPage';
@@ -50,6 +54,12 @@ function App() {
           <Route path="skills" element={<AdminSkillsListPage />} />
           <Route path="skills/new" element={<AdminSkillFormPage />} />
           <Route path="skills/:id/edit" element={<AdminSkillFormPage />} />
+          <Route path="galleries" element={<AdminGalleriesListPage />} />
+          <Route path="galleries/new" element={<AdminGalleryFormPage />} />
+          <Route path="galleries/:id/edit" element={<AdminGalleryFormPage />} />
+          <Route path="certificates" element={<AdminCertificatesListPage />} />
+          <Route path="certificates/new" element={<AdminCertificateFormPage />} />
+          <Route path="certificates/:id/edit" element={<AdminCertificateFormPage />} />
           <Route path="tags" element={<AdminTagsPage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
         </Route>

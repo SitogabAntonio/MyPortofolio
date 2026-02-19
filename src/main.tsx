@@ -4,6 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { gsap } from 'gsap'
 import { BrowserRouter } from 'react-router-dom'
+import { ToastProvider } from './components/shared/ToastProvider'
 
 gsap.registerPlugin()
 
@@ -12,8 +13,10 @@ document.documentElement.setAttribute('data-theme', storedTheme)
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ToastProvider>
   </React.StrictMode>,
 )

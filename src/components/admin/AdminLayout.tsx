@@ -48,6 +48,27 @@ const navItems: AdminNavItem[] = [
     ),
   },
   {
+    label: 'Galleries',
+    path: '/admin/galleries',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="m8 14 2.5-2.5L14 15l2.5-2.5L20 16" />
+        <circle cx="8" cy="9" r="1.2" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Certificates',
+    path: '/admin/certificates',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M6 4h12v10H6z" />
+        <path d="m9 14-2 6 5-3 5 3-2-6" />
+      </svg>
+    ),
+  },
+  {
     label: 'Tags',
     path: '/admin/tags',
     icon: (

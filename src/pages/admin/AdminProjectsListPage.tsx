@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useToast } from '../../components/shared/ToastProvider';
 import { api } from '../../lib/api';
 import type { Project } from '../../lib/types';
 
 export default function AdminProjectsListPage() {
+  const toast = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -12,6 +14,8 @@ export default function AdminProjectsListPage() {
     setLoading(true);
     try {
       setProjects(await api.getProjects());
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal memuat project');
     } finally {
       setLoading(false);
     }
@@ -31,8 +35,13 @@ export default function AdminProjectsListPage() {
   );
 
   const remove = async (id: string) => {
-    await api.deleteProject(id);
-    await load();
+    try {
+      await api.deleteProject(id);
+      toast.success('Project berhasil dihapus');
+      await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal menghapus project');
+    }
   };
 
   return (

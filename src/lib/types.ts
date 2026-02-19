@@ -29,6 +29,29 @@ export interface Skill {
   updatedAt?: string;
 }
 
+export interface Gallery {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl: string;
+  sortOrder: number;
+  isFeatured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Certificate {
+  id: string;
+  title: string;
+  issuer: string;
+  issueDate: string;
+  credentialUrl?: string;
+  imageUrl?: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Experience {
   id: string;
   company: string;
@@ -80,6 +103,8 @@ export interface PaginatedResponse<T> {
 export type ProjectFormData = Omit<Project, 'id' | 'createdAt' | 'updatedAt'>;
 export type SkillFormData = Omit<Skill, 'id' | 'createdAt' | 'updatedAt'>;
 export type ExperienceFormData = Omit<Experience, 'id' | 'createdAt'>;
+export type GalleryFormData = Omit<Gallery, 'id' | 'createdAt' | 'updatedAt'>;
+export type CertificateFormData = Omit<Certificate, 'id' | 'createdAt' | 'updatedAt'>;
 
 export interface DashboardOverview {
   totalProjects: number;

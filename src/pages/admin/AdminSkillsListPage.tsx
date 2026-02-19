@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useToast } from '../../components/shared/ToastProvider';
 import { api } from '../../lib/api';
 import type { Skill } from '../../lib/types';
 
 const categories = ['all', 'frontend', 'backend', 'devops', 'design', 'other'] as const;
 
 export default function AdminSkillsListPage() {
+  const toast = useToast();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<(typeof categories)[number]>('all');
@@ -14,6 +16,8 @@ export default function AdminSkillsListPage() {
     setLoading(true);
     try {
       setSkills(await api.getSkills());
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal memuat skill');
     } finally {
       setLoading(false);
     }
@@ -29,8 +33,13 @@ export default function AdminSkillsListPage() {
   );
 
   const deleteSkill = async (id: string) => {
-    await api.deleteSkill(id);
-    await loadData();
+    try {
+      await api.deleteSkill(id);
+      toast.success('Skill berhasil dihapus');
+      await loadData();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal menghapus skill');
+    }
   };
 
   return (
