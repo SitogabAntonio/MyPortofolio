@@ -80,7 +80,21 @@ export default function AdminSkillsListPage() {
           <article key={skill.id} className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-white">{skill.name}</h2>
+                <div className="flex items-center gap-2">
+                  {skill.icon && (
+                    <img
+                      src={skill.icon}
+                      alt={`${skill.name} icon`}
+                      className="h-5 w-5 rounded object-contain"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      onError={(event) => {
+                        event.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
+                  <h2 className="text-lg font-semibold text-white">{skill.name}</h2>
+                </div>
                 <p className="text-xs capitalize text-neutral-400">{skill.category}</p>
               </div>
               <span className="rounded-md bg-neutral-800 px-2 py-1 text-xs text-neutral-300">

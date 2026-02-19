@@ -413,7 +413,21 @@ export default function Hero() {
                         {catSkills.map((skill) => (
                           <div key={skill.id}>
                             <div className="flex items-center justify-between mb-2.5">
-                              <span className="text-[13.5px] text-neutral-200">{skill.name}</span>
+                              <div className="flex items-center gap-2">
+                                {skill.icon && (
+                                  <img
+                                    src={skill.icon}
+                                    alt={`${skill.name} icon`}
+                                    className="h-4 w-4 rounded-sm object-contain"
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer"
+                                    onError={(event) => {
+                                      event.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                )}
+                                <span className="text-[13.5px] text-neutral-200">{skill.name}</span>
+                              </div>
                               <span className="font-['Bebas_Neue'] text-[12px] tracking-[0.1em] text-blue-700 tabular-nums">
                                 {skill.yearsOfExperience} YRS
                               </span>
