@@ -34,6 +34,14 @@ export default function AdminExperiencesListPage() {
     }
   };
 
+  const formatDateRange = (startDate: string, endDate?: string) => {
+    const start = new Date(startDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'short' });
+    const end = endDate
+      ? new Date(endDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'short' })
+      : 'Sekarang';
+    return `${start} - ${end}`;
+  };
+
   return (
     <div className="space-y-5">
       <section className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5">
@@ -60,7 +68,7 @@ export default function AdminExperiencesListPage() {
                 </p>
               </div>
               <span className="w-fit rounded-lg border border-neutral-700 px-2.5 py-1 text-xs text-neutral-300">
-                {experience.startDate} - {experience.endDate ?? 'Sekarang'}
+                {formatDateRange(experience.startDate, experience.endDate)}
               </span>
             </div>
 

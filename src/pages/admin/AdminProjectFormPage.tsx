@@ -167,23 +167,62 @@ export default function AdminProjectFormPage() {
       </div>
 
       <form onSubmit={onSubmit} className="grid gap-3 md:grid-cols-2">
-        <input value={form.title} onChange={(e) => setForm((v) => ({ ...v, title: e.target.value }))} placeholder="Title" className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
-        <input value={form.startDate} onChange={(e) => setForm((v) => ({ ...v, startDate: e.target.value }))} type="date" className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Judul Project</span>
+          <input
+            value={form.title}
+            onChange={(e) => setForm((v) => ({ ...v, title: e.target.value }))}
+            placeholder="Title"
+            className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2"
+          />
+        </label>
 
-        <select value={form.category} onChange={(e) => setForm((v) => ({ ...v, category: e.target.value as ProjectFormData['category'] }))} className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2">
-          <option value="web">Web</option>
-          <option value="mobile">Mobile</option>
-          <option value="desktop">Desktop</option>
-          <option value="other">Other</option>
-        </select>
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Tanggal Mulai</span>
+          <input
+            value={form.startDate}
+            onChange={(e) => setForm((v) => ({ ...v, startDate: e.target.value }))}
+            type="date"
+            className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2"
+          />
+        </label>
 
-        <select value={form.status} onChange={(e) => setForm((v) => ({ ...v, status: e.target.value as ProjectFormData['status'] }))} className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2">
-          <option value="in-progress">In Progress</option>
-          <option value="completed">Completed</option>
-          <option value="archived">Archived</option>
-        </select>
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Kategori</span>
+          <select
+            value={form.category}
+            onChange={(e) => setForm((v) => ({ ...v, category: e.target.value as ProjectFormData['category'] }))}
+            className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2"
+          >
+            <option value="web">Web</option>
+            <option value="mobile">Mobile</option>
+            <option value="desktop">Desktop</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
 
-        <textarea value={form.description} onChange={(e) => setForm((v) => ({ ...v, description: e.target.value }))} placeholder="Description" className="md:col-span-2 rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Status</span>
+          <select
+            value={form.status}
+            onChange={(e) => setForm((v) => ({ ...v, status: e.target.value as ProjectFormData['status'] }))}
+            className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2"
+          >
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="archived">Archived</option>
+          </select>
+        </label>
+
+        <label className="space-y-1 text-sm text-neutral-300 md:col-span-2">
+          <span>Deskripsi</span>
+          <textarea
+            value={form.description}
+            onChange={(e) => setForm((v) => ({ ...v, description: e.target.value }))}
+            placeholder="Description"
+            className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2"
+          />
+        </label>
 
         <div className="md:col-span-2 rounded-xl border border-neutral-700 bg-neutral-950 p-3">
           <p className="mb-2 text-xs uppercase tracking-[0.16em] text-neutral-500">Tags (multiple + search + ketik manual)</p>
@@ -249,8 +288,25 @@ export default function AdminProjectFormPage() {
           </div>
         </div>
 
-        <input value={form.demoUrl ?? ''} onChange={(e) => setForm((v) => ({ ...v, demoUrl: e.target.value }))} placeholder="Demo URL" className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
-        <input value={form.githubUrl ?? ''} onChange={(e) => setForm((v) => ({ ...v, githubUrl: e.target.value }))} placeholder="Github URL" className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Demo URL</span>
+          <input
+            value={form.demoUrl ?? ''}
+            onChange={(e) => setForm((v) => ({ ...v, demoUrl: e.target.value }))}
+            placeholder="Demo URL"
+            className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2"
+          />
+        </label>
+
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Github URL</span>
+          <input
+            value={form.githubUrl ?? ''}
+            onChange={(e) => setForm((v) => ({ ...v, githubUrl: e.target.value }))}
+            placeholder="Github URL"
+            className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2"
+          />
+        </label>
 
         <div className="md:col-span-2 flex gap-2">
           <button disabled={saving} className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-neutral-200">

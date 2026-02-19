@@ -42,6 +42,8 @@ export const onRequestPost: PagesFunction<{ portofolio_db: D1Database }> = async
   if (authError) return authError;
 
   const body = await request.json<any>();
+  const normalizedEndDate =
+    typeof body.endDate === 'string' && body.endDate.trim() === '' ? null : body.endDate ?? null;
 
   if (!body.company || !body.position || !body.location || !body.startDate || !body.description) {
     return badRequest('company, position, location, startDate, description wajib diisi');
@@ -59,7 +61,7 @@ export const onRequestPost: PagesFunction<{ portofolio_db: D1Database }> = async
       body.location,
       body.type ?? 'full-time',
       body.startDate,
-      body.endDate ?? null,
+      normalizedEndDate,
       body.description,
       JSON.stringify(body.achievements ?? []),
     )

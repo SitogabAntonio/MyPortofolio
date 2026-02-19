@@ -36,6 +36,10 @@ export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async 
   if (!row) return notFound('Experience tidak ditemukan');
 
   const body = await request.json<any>();
+  const normalizedEndDate =
+    typeof body.endDate === 'string' && body.endDate.trim() === ''
+      ? null
+      : body.endDate ?? row.end_date;
 
   await env.portofolio_db
     .prepare(
@@ -50,7 +54,7 @@ export const onRequestPut: PagesFunction<{ portofolio_db: D1Database }> = async 
       body.location ?? row.location,
       body.type ?? row.type,
       body.startDate ?? row.start_date,
-      body.endDate ?? row.end_date,
+      normalizedEndDate,
       body.description ?? row.description,
       JSON.stringify(body.achievements ?? safeJsonArray(row.achievements)),
       id,

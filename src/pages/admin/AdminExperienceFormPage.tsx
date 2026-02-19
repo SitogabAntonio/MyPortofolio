@@ -100,11 +100,45 @@ export default function AdminExperienceFormPage() {
         </Link>
       </div>
       <form onSubmit={onSubmit} className="grid gap-3 md:grid-cols-2">
-        <input value={form.company} onChange={(e) => setForm((v) => ({ ...v, company: e.target.value }))} placeholder="Company" className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
-        <input value={form.position} onChange={(e) => setForm((v) => ({ ...v, position: e.target.value }))} placeholder="Position" className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
-        <input value={form.location} onChange={(e) => setForm((v) => ({ ...v, location: e.target.value }))} placeholder="Location" className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
-        <input type="date" value={form.startDate} onChange={(e) => setForm((v) => ({ ...v, startDate: e.target.value }))} className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
-        <textarea value={form.description} onChange={(e) => setForm((v) => ({ ...v, description: e.target.value }))} placeholder="Description" className="md:col-span-2 rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Company</span>
+          <input value={form.company} onChange={(e) => setForm((v) => ({ ...v, company: e.target.value }))} placeholder="Company" className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        </label>
+
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Position</span>
+          <input value={form.position} onChange={(e) => setForm((v) => ({ ...v, position: e.target.value }))} placeholder="Position" className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        </label>
+
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Location</span>
+          <input value={form.location} onChange={(e) => setForm((v) => ({ ...v, location: e.target.value }))} placeholder="Location" className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        </label>
+
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Type</span>
+          <select value={form.type} onChange={(e) => setForm((v) => ({ ...v, type: e.target.value as ExperienceFormData['type'] }))} className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2">
+            <option value="full-time">Full Time</option>
+            <option value="part-time">Part Time</option>
+            <option value="contract">Contract</option>
+            <option value="freelance">Freelance</option>
+          </select>
+        </label>
+
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Tanggal Mulai</span>
+          <input type="date" value={form.startDate} onChange={(e) => setForm((v) => ({ ...v, startDate: e.target.value }))} className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        </label>
+
+        <label className="space-y-1 text-sm text-neutral-300">
+          <span>Tanggal Berakhir</span>
+          <input type="date" value={form.endDate ?? ''} onChange={(e) => setForm((v) => ({ ...v, endDate: e.target.value }))} className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        </label>
+
+        <label className="space-y-1 text-sm text-neutral-300 md:col-span-2">
+          <span>Description</span>
+          <textarea value={form.description} onChange={(e) => setForm((v) => ({ ...v, description: e.target.value }))} placeholder="Description" className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2" />
+        </label>
         <div className="md:col-span-2 rounded-xl border border-neutral-700 bg-neutral-950 p-3">
           <p className="mb-2 text-xs uppercase tracking-[0.16em] text-neutral-500">Technologies (pakai tags)</p>
           <div className="relative">
