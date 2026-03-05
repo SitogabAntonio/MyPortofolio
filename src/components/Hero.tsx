@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { api } from '../lib/api';
@@ -6,36 +6,34 @@ import type { Certificate, Experience, Gallery, ProfileInfo, Project, Skill } fr
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ─── Skeleton ─────────────────────────────────────────────────────────────── */
-function SkeletonCard() {
+function SectionEyebrow({ label }: { label: string }) {
   return (
-    <div className="h-40 animate-pulse border-l-2 border-neutral-800 bg-neutral-900/60 rounded-xl pl-4" />
-  );
-}
-
-/* ─── Section Label ─────────────────────────────────────────────────────────── */
-function SectionLabel({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-4 mb-10">
-      <span className="h-px flex-1 bg-neutral-800" />
-      <span className="text-[10px] text-neutral-500 uppercase tracking-[0.3em] font-['Bebas_Neue']">
+    <div className="mb-6 flex items-center gap-4">
+      <span className="h-px flex-1 bg-white/10" />
+      <span className="font-['Space_Grotesk',sans-serif] text-[11px] uppercase tracking-[0.35em] text-cyan-300/85">
         {label}
       </span>
-      <span className="h-px w-12 bg-blue-700" />
+      <span className="h-px w-14 bg-cyan-400/70" />
     </div>
   );
 }
 
-/* ─── Tag ───────────────────────────────────────────────────────────────────── */
 function Tag({ children }: { children: React.ReactNode }) {
   return (
-    <span className="border border-neutral-700 px-2 py-0.5 text-[11px] uppercase tracking-widest text-neutral-400 rounded-[4px]">
+    <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-300">
       {children}
     </span>
   );
 }
 
-/* ─── Main ──────────────────────────────────────────────────────────────────── */
+function SkeletonBlock({ className = '' }: { className?: string }) {
+  return <div className={`animate-pulse rounded-2xl bg-slate-700/35 ${className}`} />;
+}
+
+function formatMonthYear(date: string) {
+  return new Date(date).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+}
+
 export default function Hero() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileInfo | null>(null);
@@ -49,330 +47,385 @@ export default function Hero() {
   const projectCounterRef = useRef<HTMLSpanElement>(null);
   const expCounterRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const formatDateRange = (startDate: string, endDate?: string) => {
-    const start = new Date(startDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'short' });
-    const end = endDate
-      ? new Date(endDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'short' })
-      : 'Sekarang';
-    return `${start} - ${end}`;
-  };
+  const publicGithubUrl = 'https://github.com/SitogabAntonio';
+  const publicLinkedinUrl = 'https://www.linkedin.com/in/sitogab-antonio/';
 
   useEffect(() => {
     const load = async () => {
       try {
         const [profileData, projectData, skillData, experienceData, galleryData, certificateData] =
           await Promise.all([
-            api.getProfile(), api.getProjects(), api.getSkills(),
-            api.getExperiences(), api.getGalleries(), api.getCertificates(),
+            api.getProfile(),
+            api.getProjects(),
+            api.getSkills(),
+            api.getExperiences(),
+            api.getGalleries(),
+            api.getCertificates(),
           ]);
-        setProfile(profileData); setProjects(projectData); setSkills(skillData);
-        setExperiences(experienceData); setGalleries(galleryData); setCertificates(certificateData);
+
+        setProfile(profileData);
+        setProjects(projectData);
+        setSkills(skillData);
+        setExperiences(experienceData);
+        setGalleries(galleryData);
+        setCertificates(certificateData);
       } catch {
-        setProfile(null); setProjects([]); setSkills([]);
-        setExperiences([]); setGalleries([]); setCertificates([]);
+        setProfile(null);
+        setProjects([]);
+        setSkills([]);
+        setExperiences([]);
+        setGalleries([]);
+        setCertificates([]);
       } finally {
         setLoading(false);
       }
     };
+
     void load();
   }, []);
 
   useEffect(() => {
     if (loading || !containerRef.current) return;
-    ScrollTrigger.getAll().forEach((t) => t.kill());
-    gsap.fromTo(
-      containerRef.current.querySelectorAll('.reveal-item'),
-      { y: 40, opacity: 0 },
-      { y: 0, opacity: 1, stagger: 0.1, duration: 0.9, ease: 'power3.out' },
-    );
-    gsap.fromTo(
-      containerRef.current.querySelectorAll('.project-card'),
-      { y: 40, opacity: 0 },
-      { y: 0, opacity: 1, stagger: 0.1, duration: 0.85, ease: 'power2.out', delay: 0.2 },
-    );
-    gsap.utils.toArray<HTMLElement>('.animate-section').forEach((section) => {
-      gsap.fromTo(section, { y: 50, opacity: 0 }, {
-        y: 0, opacity: 1, duration: 1, ease: 'power3.out',
-        scrollTrigger: { trigger: section, start: 'top 82%' },
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        '.reveal',
+        { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: 'power3.out' },
+      );
+
+      gsap.utils.toArray<HTMLElement>('.section-block').forEach((section) => {
+        gsap.fromTo(
+          section,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: section,
+              start: 'top 84%',
+            },
+          },
+        );
       });
-    });
+    }, containerRef);
+
+    return () => ctx.revert();
   }, [loading]);
 
   useEffect(() => {
     if (loading) return;
+
     const maxYears = skills.length ? Math.max(...skills.map((s) => s.yearsOfExperience || 0)) : 0;
-    const animate = (el: HTMLSpanElement | null, val: number) => {
+
+    const animateCounter = (el: HTMLSpanElement | null, value: number) => {
       if (!el) return;
       const proxy = { value: 0 };
       gsap.to(proxy, {
-        value: val, duration: 1.6, ease: 'power2.out', snap: { value: 1 },
-        onUpdate: () => { el.textContent = String(proxy.value); },
+        value,
+        duration: 1.4,
+        ease: 'power2.out',
+        snap: { value: 1 },
+        onUpdate: () => {
+          el.textContent = String(proxy.value);
+        },
       });
     };
-    animate(projectCounterRef.current, projects.length);
-    animate(expCounterRef.current, maxYears);
+
+    animateCounter(projectCounterRef.current, projects.length);
+    animateCounter(expCounterRef.current, maxYears);
   }, [loading, projects.length, skills]);
 
-  /* show ALL projects, no slice */
-  const allProjects = useMemo(() => projects, [projects]);
+  const sortedProjects = useMemo(
+    () => [...projects].sort((a, b) => Number(b.featured) - Number(a.featured)),
+    [projects],
+  );
 
-  const getProjectImages = (project: Project) => {
-    const imgs = (project.imageUrls ?? []).filter(Boolean);
-    if (imgs.length) return imgs.slice(0, 3);
-    if (project.imageUrl) return [project.imageUrl];
-    return ['https://picsum.photos/seed/project/700/420'];
-  };
+  const maxSkillYears = skills.length ? Math.max(...skills.map((s) => s.yearsOfExperience || 0)) : 0;
 
-  const slide = (id: string, total: number, dir: 1 | -1) =>
-    setSlideIndex((prev) => {
-      const cur = prev[id] ?? 0;
-      return { ...prev, [id]: (cur + dir + total) % total };
-    });
-
-  const toggleExpand = (id: string) =>
-    setExpandedProjects((prev) => ({ ...prev, [id]: !prev[id] }));
-
-  const maxSkillYears = skills.length
-    ? Math.max(...skills.map((s) => s.yearsOfExperience || 0))
-    : 0;
-
-  /* group skills by category */
   const skillsByCategory = useMemo(() => {
-    const map: Record<string, Skill[]> = {};
-    skills.forEach((s) => {
-      const cat = s.category || 'Other';
-      if (!map[cat]) map[cat] = [];
-      map[cat].push(s);
+    const groups: Record<string, Skill[]> = {};
+    skills.forEach((skill) => {
+      const category = skill.category || 'other';
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(skill);
     });
-    return map;
+    return groups;
   }, [skills]);
 
+  const topSkills = useMemo(
+    () =>
+      [...skills]
+        .filter((skill) => skill.category === 'frontend' || skill.category === 'backend')
+        .sort((a, b) => (b.yearsOfExperience || 0) - (a.yearsOfExperience || 0))
+        .slice(0, 6),
+    [skills],
+  );
+
+  const getProjectImages = (project: Project) => {
+    const imageList = (project.imageUrls ?? []).filter(Boolean);
+    if (imageList.length > 0) return imageList.slice(0, 4);
+    if (project.imageUrl) return [project.imageUrl];
+    return ['https://picsum.photos/seed/project-fallback/960/540'];
+  };
+
+  const slide = (id: string, total: number, direction: 1 | -1) => {
+    setSlideIndex((prev) => {
+      const current = prev[id] ?? 0;
+      return { ...prev, [id]: (current + direction + total) % total };
+    });
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedProjects((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
-    <div
-      ref={containerRef}
-      className="bg-[#0c0c0c] text-neutral-200 font-['DM_Mono',monospace]"
-    >
+    <div ref={containerRef} className="public-page relative overflow-hidden bg-[#07131d] text-slate-100">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-28 left-[-120px] h-96 w-96 rounded-full bg-cyan-500/20 blur-[120px]" />
+        <div className="absolute right-[-140px] top-[35%] h-[26rem] w-[26rem] rounded-full bg-fuchsia-500/15 blur-[150px]" />
+        <div className="absolute bottom-[-80px] left-[35%] h-72 w-72 rounded-full bg-sky-500/20 blur-[120px]" />
+      </div>
 
-      {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden px-6 md:px-16 lg:px-24 pt-28 pb-24 animate-section">
-        {/* Grid bg */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-        />
-        <div className="absolute top-0 right-0 w-0.5 h-40 bg-blue-700" />
-        <div className="absolute top-0 right-0 h-0.5 w-40 bg-blue-700" />
-
-        <div className="relative mx-auto w-full max-w-7xl grid lg:grid-cols-[1fr_300px] gap-14 items-center">
-          {/* Left */}
-          <div className="space-y-6">
-            <div className="reveal-item flex items-center gap-3">
-              <span className="px-3 py-1 border border-blue-700 text-blue-700 text-[11px] tracking-[0.3em] font-['Bebas_Neue'] rounded-[4px]">
-                PORTFOLIO
-              </span>
-              <span className="text-[11px] text-neutral-600">— 2026</span>
-            </div>
-
-            {/* ① Title perkecil: clamp max dari 6.5rem → 4rem */}
-            <h1 className="reveal-item leading-[1.05] tracking-tight font-['DM_Serif_Display',serif] text-[clamp(2.4rem,5vw,4rem)] text-neutral-100">
-              <span className="text-blue-700">Hi,</span>{' '}
-              <span>saya</span>{' '}
-              <em>{profile?.name ?? 'Developer'}</em>
+      <section className="section-block relative px-6 pb-16 pt-32 md:px-16 lg:px-24">
+        <div className="mx-auto grid w-full max-w-7xl gap-12 lg:grid-cols-[1fr_360px]">
+          <div>
+            <p className="reveal inline-flex rounded-full border border-cyan-300/30 bg-cyan-400/10 px-4 py-1 text-[11px] uppercase tracking-[0.32em] text-cyan-100">
+              Portfolio 2026
+            </p>
+            <h1 className="reveal mt-6 font-['Fraunces',serif] text-[clamp(2.4rem,6vw,5rem)] leading-[0.95] text-slate-50">
+              Halo, saya Sitogab Antonio.
             </h1>
-
-            <p className="reveal-item max-w-xl leading-relaxed text-[15px] text-neutral-500">
-              {profile?.tagline ?? 'Full-Stack Developer — crafting scalable digital solutions'}
+            <p className="reveal mt-5 max-w-2xl text-[15px] leading-relaxed text-slate-300/90">
+              {profile?.tagline ?? 'Full-stack developer focused on practical performance and strong product details.'}
             </p>
 
-            <div className="reveal-item flex flex-wrap gap-4">
-              <a
-                href="#about"
-                className="px-7 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-['Bebas_Neue'] text-[0.85rem] tracking-[0.2em] rounded-[6px] transition-all hover:-translate-y-px hover:shadow-[0_8px_28px_rgba(59,130,246,0.3)]"
-              >
-                Tentang Saya
-              </a>
+            <div className="reveal mt-8 flex flex-wrap gap-3">
               <a
                 href="#projects"
-                className="px-7 py-2.5 border border-neutral-700 hover:border-blue-700 text-neutral-400 hover:text-neutral-200 font-['Bebas_Neue'] text-[0.85rem] tracking-[0.2em] rounded-[6px] transition-all"
+                className="rounded-full bg-cyan-400 px-6 py-2.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-slate-900 transition hover:bg-cyan-300"
               >
-                Lihat Projects
+                Explore Work
               </a>
+              <a
+                href="#about"
+                className="rounded-full border border-white/25 px-6 py-2.5 text-[12px] uppercase tracking-[0.2em] text-slate-100 transition hover:border-cyan-300 hover:text-cyan-200"
+              >
+                About Me
+              </a>
+              {profile?.resumeUrl && (
+                <a
+                  href={profile.resumeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-white/15 bg-white/5 px-6 py-2.5 text-[12px] uppercase tracking-[0.2em] text-slate-100 transition hover:border-white/35 hover:bg-white/10"
+                >
+                  Resume
+                </a>
+              )}
             </div>
 
-            {/* Stats */}
             {!loading && (
-              <div className="reveal-item flex gap-6 pt-4 border-t border-neutral-800">
-                <div>
-                  <p className="font-['Bebas_Neue'] text-[1.9rem] text-neutral-100 leading-none">
+              <div className="reveal mt-10 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/12 bg-slate-900/45 p-4 backdrop-blur-sm">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Projects</p>
+                  <p className="mt-2 text-3xl font-semibold text-slate-50">
                     <span ref={projectCounterRef}>0</span>
                   </p>
-                  <p className="mt-1 text-[10px] text-neutral-600 tracking-[0.15em]">PROJECTS</p>
                 </div>
-                <div className="w-px bg-neutral-800" />
-                <div>
-                  <p className="font-['Bebas_Neue'] text-[1.9rem] text-neutral-100 leading-none">
+                <div className="rounded-2xl border border-white/12 bg-slate-900/45 p-4 backdrop-blur-sm">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Max Skill Exp</p>
+                  <p className="mt-2 text-3xl font-semibold text-slate-50">
                     <span ref={expCounterRef}>0</span>
-                    <span className="text-sm text-neutral-600 ml-1">YRS</span>
+                    <span className="ml-1 text-base text-slate-400">yrs</span>
                   </p>
-                  <p className="mt-1 text-[10px] text-neutral-600 tracking-[0.15em]">MAX SKILL EXP</p>
                 </div>
-                <div className="w-px bg-neutral-800" />
-                <div>
-                  <p className="font-['Bebas_Neue'] text-[1.9rem] text-neutral-100 leading-none">
-                    {skills.length}
-                  </p>
-                  <p className="mt-1 text-[10px] text-neutral-600 tracking-[0.15em]">SKILLS</p>
+                <div className="rounded-2xl border border-white/12 bg-slate-900/45 p-4 backdrop-blur-sm">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Skills</p>
+                  <p className="mt-2 text-3xl font-semibold text-slate-50">{skills.length}</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Right — Avatar */}
-          <div className="reveal-item relative">
-            <div className="relative overflow-hidden border border-neutral-800 rounded-xl aspect-[4/5]">
-              <span className="absolute top-0 left-0 w-6 h-6 z-10 pointer-events-none border-t-2 border-l-2 border-blue-700 rounded-tl-xl" />
-              <span className="absolute bottom-0 right-0 w-6 h-6 z-10 pointer-events-none border-b-2 border-r-2 border-blue-700 rounded-br-xl" />
-              {profile?.avatarUrl ? (
-                <img
-                  src={profile.avatarUrl}
-                  alt={profile.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full min-h-[300px] items-center justify-center bg-neutral-900 text-neutral-600 text-xs tracking-[0.2em]">
-                  NO IMAGE
-                </div>
-              )}
-              <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-[#0c0c0c]/60" />
+          <div className="reveal space-y-4">
+            <div className="overflow-hidden rounded-[2rem] border border-white/15 bg-slate-900/50 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+              <div className="relative overflow-hidden rounded-[1.4rem] border border-white/10 bg-slate-950/60">
+                {profile?.avatarUrl ? (
+                  <img src={profile.avatarUrl} alt={profile.name} className="h-[360px] w-full object-cover" />
+                ) : (
+                  <div className="flex h-[360px] items-center justify-center text-[11px] uppercase tracking-[0.24em] text-slate-500">
+                    No Avatar
+                  </div>
+                )}
+              </div>
+              <div className="mt-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/90">{profile?.name ?? 'Portfolio Owner'}</p>
+                <p className="mt-2 text-sm leading-relaxed text-slate-300">
+                  {profile?.location || 'Remote'}
+                  {profile?.email ? ` • ${profile.email}` : ''}
+                </p>
+              </div>
             </div>
-            <div className="absolute -z-10 bottom-[-10px] right-[-10px] w-[55%] h-[55%] border border-neutral-900 rounded-xl" />
-          </div>
-        </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-          <div className="w-px h-9 animate-bounce bg-gradient-to-b from-blue-700 to-transparent" />
-        </div>
-      </section>
-
-      {/* ── ABOUT ─────────────────────────────────────────────────────────── */}
-      <section id="about" className="px-6 md:px-16 lg:px-24 py-20 animate-section">
-        <div className="mx-auto max-w-7xl">
-          <SectionLabel label="Tentang Saya" />
-          <div className="relative pl-8">
-            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-700 rounded-full" />
-            <h2 className="mb-4 font-['DM_Serif_Display',serif] text-[clamp(1.6rem,3vw,2.4rem)] text-neutral-100 font-normal">
-              {profile?.name}
-            </h2>
-            <p className="max-w-3xl leading-relaxed text-[15px] text-neutral-500">
-              {profile?.bio ?? 'Developer yang passionate di frontend & backend, suka membangun aplikasi yang scalable dan user-friendly.'}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-6 text-[13px] text-neutral-600 tracking-[0.1em]">
-              {profile?.email && (
-                <div className="flex items-center gap-2">
-                  <span className="text-blue-700">✉</span>
-                  {profile.email}
+            {topSkills.length > 0 && (
+              <div className="rounded-2xl border border-white/12 bg-slate-900/45 p-4 backdrop-blur-sm">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-cyan-200/80">Core Stack (FE and BE)</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {topSkills.map((skill) => (
+                    <span
+                      key={skill.id}
+                      className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-300"
+                    >
+                      {skill.icon && (
+                        <img
+                          src={skill.icon}
+                          alt={`${skill.name} icon`}
+                          className="h-3.5 w-3.5 rounded-sm object-contain"
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                          onError={(event) => {
+                            event.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+                      {skill.name}
+                    </span>
+                  ))}
                 </div>
-              )}
-              {profile?.location && (
-                <div className="flex items-center gap-2">
-                  <span className="text-blue-700">◎</span>
-                  {profile.location}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── PROJECTS — show ALL ────────────────────────────────────────────── */}
-      <section id="projects" className="px-6 md:px-16 lg:px-24 py-20 animate-section">
-        <div className="mx-auto max-w-7xl">
-          <SectionLabel label="Projects" />
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {loading && Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-            {!loading && !allProjects.length && (
-              <p className="text-[15px] text-neutral-600">Belum ada project. Tambahkan dari admin panel.</p>
+              </div>
             )}
-            {allProjects.map((project) => {
-              const images = getProjectImages(project);
-              const current = slideIndex[project.id] ?? 0;
-              const isExpanded = expandedProjects[project.id] ?? false;
-              return (
-                <article
-                  key={project.id}
-                  className="project-card group bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden"
+          </div>
+        </div>
+      </section>
+
+      <section id="about" className="section-block px-6 py-14 md:px-16 lg:px-24">
+        <div className="mx-auto max-w-7xl">
+          <SectionEyebrow label="About" />
+          <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
+            <article className="rounded-3xl border border-white/12 bg-slate-900/50 p-7 backdrop-blur-sm">
+              <h2 className="font-['Fraunces',serif] text-3xl text-slate-50">{profile?.name ?? 'Developer'}</h2>
+              <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-slate-300/90">
+                {profile?.bio ?? 'I build maintainable web experiences with clear architecture, reliable backend flows, and measurable impact.'}
+              </p>
+            </article>
+            <article className="rounded-3xl border border-white/12 bg-gradient-to-br from-slate-900/70 to-slate-950/70 p-7">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-cyan-200/80">Connect</p>
+              <div className="mt-4 space-y-2 text-sm text-slate-200">
+                {profile?.email && <p>{profile.email}</p>}
+                {profile?.location && <p>{profile.location}</p>}
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <a
+                  className="rounded-full border border-white/20 px-3 py-1.5 text-xs uppercase tracking-[0.15em] text-slate-100 hover:border-cyan-300"
+                  href={publicGithubUrl}
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  {/* Image */}
-                  <div className="relative overflow-hidden h-[170px]">
+                  Github
+                </a>
+                <a
+                  className="rounded-full border border-white/20 px-3 py-1.5 text-xs uppercase tracking-[0.15em] text-slate-100 hover:border-cyan-300"
+                  href={publicLinkedinUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Linkedin
+                </a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="projects" className="section-block px-6 py-14 md:px-16 lg:px-24">
+        <div className="mx-auto max-w-7xl">
+          <SectionEyebrow label="Selected Projects" />
+          {loading && (
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <SkeletonBlock key={index} className="h-[310px]" />
+              ))}
+            </div>
+          )}
+
+          {!loading && !sortedProjects.length && (
+            <p className="rounded-2xl border border-white/12 bg-slate-900/40 p-5 text-sm text-slate-300">
+              Belum ada project. Tambahkan dari admin panel.
+            </p>
+          )}
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {sortedProjects.map((project) => {
+              const images = getProjectImages(project);
+              const currentImage = slideIndex[project.id] ?? 0;
+              const isExpanded = expandedProjects[project.id] ?? false;
+
+              return (
+                <article key={project.id} className="group overflow-hidden rounded-3xl border border-white/12 bg-slate-900/50 backdrop-blur-sm transition hover:border-cyan-300/45">
+                  <div className="relative h-48 overflow-hidden">
                     <img
-                      src={images[current]}
+                      src={images[currentImage]}
                       alt={project.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0c0c0c]/90 via-transparent to-transparent" />
-
-                    {/* Expand / collapse */}
-                    <div className="absolute top-2.5 right-2.5 z-10">
-                      <button
-                        type="button"
-                        onClick={() => toggleExpand(project.id)}
-                        title={isExpanded ? 'Collapse' : 'Expand'}
-                        className="w-6 h-6 flex items-center justify-center rounded-md border border-white/20 bg-black/60 text-neutral-300 hover:border-blue-700 hover:bg-blue-700/20 hover:text-white transition-all text-base font-mono backdrop-blur-sm leading-none"
-                      >
-                        {isExpanded ? '−' : '+'}
-                      </button>
-                    </div>
-
-                    {/* Slide controls */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/20 to-transparent" />
+                    <span className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/40 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-200">
+                      {project.status}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(project.id)}
+                      className="absolute right-3 top-3 rounded-full border border-white/25 bg-black/45 px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-slate-100 hover:border-cyan-300"
+                    >
+                      {isExpanded ? 'less' : 'more'}
+                    </button>
                     {images.length > 1 && (
                       <>
                         <button
                           type="button"
                           onClick={() => slide(project.id, images.length, -1)}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 px-2 py-0.5 bg-black/55 border border-neutral-700 rounded-md text-white text-lg hover:border-blue-700 transition-colors"
+                          className="absolute left-3 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full border border-white/25 bg-black/50 text-lg text-white"
                         >
-                          ‹
+                          {'<'}
                         </button>
                         <button
                           type="button"
                           onClick={() => slide(project.id, images.length, 1)}
-                          className="absolute right-10 top-1/2 -translate-y-1/2 z-10 px-2 py-0.5 bg-black/55 border border-neutral-700 rounded-md text-white text-lg hover:border-blue-700 transition-colors"
+                          className="absolute right-3 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full border border-white/25 bg-black/50 text-lg text-white"
                         >
-                          ›
+                          {'>'}
                         </button>
-                        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-                          {images.map((_, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => setSlideIndex((prev) => ({ ...prev, [project.id]: idx }))}
-                              aria-label={`Slide ${idx + 1}`}
-                              className={`h-1.5 rounded-sm border-0 cursor-pointer p-0 transition-all duration-300 ${
-                                idx === current ? 'w-[18px] bg-blue-700' : 'w-1.5 bg-neutral-600'
-                              }`}
-                            />
-                          ))}
-                        </div>
                       </>
                     )}
                   </div>
 
-                  {/* Content */}
-                  <div className="p-4">
-                    <h3 className="font-['DM_Serif_Display',serif] text-[1.1rem] text-neutral-100 font-normal">
-                      {project.title}
-                    </h3>
-                    <p className={`text-[13px] text-neutral-500 mt-1.5 leading-relaxed transition-all duration-300 ${isExpanded ? '' : 'line-clamp-2'}`}>
+                  <div className="p-5">
+                    <h3 className="font-['Fraunces',serif] text-xl text-slate-50">{project.title}</h3>
+                    <p className={`mt-3 text-sm leading-relaxed text-slate-300/90 ${isExpanded ? '' : 'line-clamp-2'}`}>
                       {project.description}
                     </p>
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {project.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}
+
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {project.tags.map((tag) => (
+                        <Tag key={`${project.id}-${tag}`}>{tag}</Tag>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.18em]">
+                      {project.demoUrl && (
+                        <a href={project.demoUrl} target="_blank" rel="noreferrer" className="text-cyan-200 hover:text-cyan-100">
+                          Live Demo
+                        </a>
+                      )}
+                      {project.githubUrl && (
+                        <a href={project.githubUrl} target="_blank" rel="noreferrer" className="text-slate-300 hover:text-white">
+                          Source
+                        </a>
+                      )}
                     </div>
                   </div>
                 </article>
@@ -382,150 +435,143 @@ export default function Hero() {
         </div>
       </section>
 
-      {/* ── SKILLS & EXPERIENCE ───────────────────────────────────────────── */}
-      <section id="skills" className="px-6 md:px-16 lg:px-24 py-20 animate-section">
+      <section id="skills" className="section-block px-6 py-14 md:px-16 lg:px-24">
         <div className="mx-auto max-w-7xl">
-          <SectionLabel label="Skills & Experience" />
-          <div className="grid gap-6 lg:grid-cols-2">
-
-            {/* ③ Skills — grouped by category, more breathing room */}
-            <div className="reveal-item p-6 bg-neutral-900 border border-neutral-800 rounded-xl">
-              <h3 className="mb-6 font-['Bebas_Neue'] text-[11px] tracking-[0.3em] text-blue-700 uppercase">
-                Technical Skills
-              </h3>
-              {loading ? (
-                <div className="space-y-5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="h-10 animate-pulse rounded-lg bg-neutral-800" />
+          <SectionEyebrow label="Skills And Experience" />
+          <div className="grid gap-5 lg:grid-cols-2">
+            <article className="rounded-3xl border border-white/12 bg-slate-900/50 p-6 backdrop-blur-sm">
+              <h3 className="text-[11px] uppercase tracking-[0.28em] text-cyan-200/85">Skill Groups</h3>
+              {loading && (
+                <div className="mt-5 space-y-3">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <SkeletonBlock key={index} className="h-10" />
                   ))}
                 </div>
-              ) : skills.length === 0 ? (
-                <p className="text-[13px] text-neutral-600">Belum ada data skill.</p>
-              ) : (
-                <div className="space-y-8">
-                  {Object.entries(skillsByCategory).map(([category, catSkills]) => (
+              )}
+              {!loading && skills.length === 0 && <p className="mt-4 text-sm text-slate-400">Belum ada data skill.</p>}
+              {!loading && skills.length > 0 && (
+                <div className="mt-5 space-y-7">
+                  {Object.entries(skillsByCategory).map(([category, group]) => (
                     <div key={category}>
-                      {/* Category header */}
-                      <p className="text-[10px] uppercase tracking-[0.25em] text-neutral-600 mb-4 pb-2 border-b border-neutral-800">
-                        {category}
-                      </p>
-                      <div className="space-y-5">
-                        {catSkills.map((skill) => (
-                          <div key={skill.id}>
-                            <div className="flex items-center justify-between mb-2.5">
-                              <div className="flex items-center gap-2">
-                                {skill.icon && (
-                                  <img
-                                    src={skill.icon}
-                                    alt={`${skill.name} icon`}
-                                    className="h-4 w-4 rounded-sm object-contain"
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer"
-                                    onError={(event) => {
-                                      event.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                )}
-                                <span className="text-[13.5px] text-neutral-200">{skill.name}</span>
+                      <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">{category}</p>
+                      <div className="mt-3 space-y-4">
+                        {group.map((skill) => {
+                          const width = maxSkillYears
+                            ? `${((skill.yearsOfExperience || 0) / maxSkillYears) * 100}%`
+                            : '0%';
+                          return (
+                            <div key={skill.id}>
+                              <div className="mb-2 flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-2">
+                                  {skill.icon && (
+                                    <img
+                                      src={skill.icon}
+                                      alt={`${skill.name} icon`}
+                                      className="h-4 w-4 rounded-sm object-contain"
+                                      loading="lazy"
+                                      referrerPolicy="no-referrer"
+                                      onError={(event) => {
+                                        event.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  )}
+                                  <p className="text-sm text-slate-100">{skill.name}</p>
+                                </div>
+                                <p className="whitespace-nowrap text-xs uppercase tracking-[0.14em] text-cyan-200">
+                                  {skill.yearsOfExperience} yrs
+                                </p>
                               </div>
-                              <span className="font-['Bebas_Neue'] text-[12px] tracking-[0.1em] text-blue-700 tabular-nums">
-                                {skill.yearsOfExperience} YRS
-                              </span>
+                              <div className="h-2 rounded-full bg-slate-700/60">
+                                <div
+                                  className="h-2 rounded-full bg-gradient-to-r from-cyan-300 via-cyan-400 to-blue-400"
+                                  style={{ width }}
+                                />
+                              </div>
                             </div>
-                            {/* Progress bar */}
-                            <div className="h-[3px] bg-neutral-800 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-blue-700 to-blue-500 rounded-full transition-all duration-1000"
-                                style={{
-                                  width: maxSkillYears
-                                    ? `${((skill.yearsOfExperience || 0) / maxSkillYears) * 100}%`
-                                    : '0%',
-                                }}
-                              />
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </article>
 
-            {/* Experience */}
-            <div className="reveal-item p-6 bg-neutral-900 border border-neutral-800 rounded-xl">
-              <h3 className="mb-6 font-['Bebas_Neue'] text-[11px] tracking-[0.3em] text-blue-700 uppercase">
-                Work Experience
-              </h3>
-              {loading ? (
-                <div className="space-y-4">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-16 animate-pulse rounded bg-neutral-800" />
+            <article className="rounded-3xl border border-white/12 bg-slate-900/50 p-6 backdrop-blur-sm">
+              <h3 className="text-[11px] uppercase tracking-[0.28em] text-cyan-200/85">Experience Timeline</h3>
+              {loading && (
+                <div className="mt-5 space-y-4">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <SkeletonBlock key={index} className="h-[76px]" />
                   ))}
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {experiences.slice(0, 8).map((exp) => (
-                    <div
-                      key={exp.id}
-                      className="relative pl-5 pb-3 border-l border-neutral-800 hover:border-blue-700 transition-colors
-                                 before:content-[''] before:absolute before:left-[-4px] before:top-[7px]
-                                 before:w-[7px] before:h-[7px] before:bg-blue-700 before:rounded-[1px]"
-                    >
-                      <p className="text-[14px] text-neutral-100 font-medium">{exp.position}</p>
-                      <p className="text-[12.5px] text-blue-700 mt-0.5">
-                        {exp.company}{exp.location ? ` · ${exp.location}` : ''}
-                      </p>
-                      <p className="text-[11.5px] text-neutral-600 mt-0.5">
-                        {formatDateRange(exp.startDate, exp.endDate)}
-                      </p>
-                      {exp.technologies.length > 0 && (
-                        <div className="mt-2.5 flex flex-wrap gap-1.5">
-                          {exp.technologies.map((tech) => (
-                            <Tag key={`${exp.id}-${tech}`}>{tech}</Tag>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {!experiences.length && (
-                    <p className="text-[13px] text-neutral-600">Belum ada data experience.</p>
-                  )}
                 </div>
               )}
-            </div>
+              {!loading && experiences.length === 0 && (
+                <p className="mt-4 text-sm text-slate-400">Belum ada data experience.</p>
+              )}
+              {!loading && experiences.length > 0 && (
+                <div className="mt-5 space-y-5">
+                  {experiences.slice(0, 8).map((exp) => (
+                    <div key={exp.id} className="relative rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+                      <div className="absolute left-4 top-0 h-full w-px bg-white/10" />
+                      <div className="relative pl-5">
+                        <span className="absolute left-[-1px] top-1 h-2.5 w-2.5 rounded-full bg-cyan-300" />
+                        <p className="text-sm font-medium text-slate-100">{exp.position}</p>
+                        <p className="mt-0.5 text-[13px] text-cyan-200/90">
+                          {exp.company}
+                          {exp.location ? ` • ${exp.location}` : ''}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          {formatMonthYear(exp.startDate)} - {exp.endDate ? formatMonthYear(exp.endDate) : 'Sekarang'}
+                        </p>
+                        {exp.technologies.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {exp.technologies.map((tech) => (
+                              <Tag key={`${exp.id}-${tech}`}>{tech}</Tag>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </article>
           </div>
         </div>
       </section>
 
-      {/* ── GALLERY ───────────────────────────────────────────────────────── */}
-      <section id="gallery" className="px-6 md:px-16 lg:px-24 py-20 animate-section">
+      <section id="gallery" className="section-block px-6 py-14 md:px-16 lg:px-24">
         <div className="mx-auto max-w-7xl">
-          <SectionLabel label="Gallery" />
+          <SectionEyebrow label="Gallery" />
+          {loading && (
+            <div className="grid gap-4 md:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <SkeletonBlock key={index} className="h-44" />
+              ))}
+            </div>
+          )}
+          {!loading && galleries.length === 0 && (
+            <p className="rounded-2xl border border-white/12 bg-slate-900/40 p-5 text-sm text-slate-300">
+              Belum ada data gallery.
+            </p>
+          )}
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {loading && Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
-            {!loading && !galleries.length && (
-              <p className="text-[13px] text-neutral-600">Belum ada data gallery.</p>
-            )}
-            {galleries.slice(0, 6).map((item) => (
+            {galleries.slice(0, 6).map((item, index) => (
               <article
                 key={item.id}
-                className="group overflow-hidden border border-neutral-800 bg-neutral-900 rounded-xl"
+                className={`overflow-hidden rounded-3xl border border-white/12 bg-slate-900/40 ${index === 0 ? 'xl:col-span-2' : ''}`}
               >
-                <div className="overflow-hidden h-[165px] rounded-t-xl">
+                <div className={`overflow-hidden ${index === 0 ? 'h-72' : 'h-52'}`}>
                   <img
                     src={item.imageUrl}
                     alt={item.title}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="h-full w-full object-cover transition duration-700 hover:scale-105"
                   />
                 </div>
                 <div className="p-4">
-                  <h3 className="font-['DM_Serif_Display',serif] text-base text-neutral-100 font-normal">
-                    {item.title}
-                  </h3>
-                  {item.description && (
-                    <p className="mt-1 leading-relaxed text-[13px] text-neutral-500">{item.description}</p>
-                  )}
+                  <h3 className="font-['Fraunces',serif] text-xl text-slate-50">{item.title}</h3>
+                  {item.description && <p className="mt-2 text-sm text-slate-300/90">{item.description}</p>}
                 </div>
               </article>
             ))}
@@ -533,62 +579,50 @@ export default function Hero() {
         </div>
       </section>
 
-      {/* ── CERTIFICATES — card style: image on top, detail below ────────── */}
-      <section id="certificates" className="px-6 md:px-16 lg:px-24 pb-24 animate-section">
+      <section id="certificates" className="section-block px-6 pb-24 pt-14 md:px-16 lg:px-24">
         <div className="mx-auto max-w-7xl">
-          <SectionLabel label="Certificates" />
+          <SectionEyebrow label="Certificates" />
+          {loading && (
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <SkeletonBlock key={index} className="h-[290px]" />
+              ))}
+            </div>
+          )}
+          {!loading && certificates.length === 0 && (
+            <p className="rounded-2xl border border-white/12 bg-slate-900/40 p-5 text-sm text-slate-300">
+              Belum ada data certificate.
+            </p>
+          )}
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {loading && Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
-            {!loading && !certificates.length && (
-              <p className="text-[13px] text-neutral-600">Belum ada data certificate.</p>
-            )}
             {certificates.slice(0, 9).map((item) => (
-              <article
-                key={item.id}
-                className="group bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden hover:border-blue-700/50 transition-colors"
-              >
-                {/* ④ Image on top */}
-                <div className="overflow-hidden h-[160px] rounded-t-xl bg-neutral-800">
+              <article key={item.id} className="overflow-hidden rounded-3xl border border-white/12 bg-slate-900/45 transition hover:border-cyan-300/50">
+                <div className="h-44 overflow-hidden bg-slate-950/60">
                   {item.imageUrl ? (
                     <img
                       src={item.imageUrl}
                       alt={item.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="h-full w-full object-cover transition duration-700 hover:scale-105"
                     />
                   ) : (
-                    <div className="h-full flex items-center justify-center">
-                      {/* Placeholder icon */}
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#404040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="8" r="4"/>
-                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-                        <path d="M9 12l-2 8 5-3 5 3-2-8"/>
-                      </svg>
+                    <div className="flex h-full items-center justify-center text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                      No Image
                     </div>
                   )}
                 </div>
-
-                {/* Detail below */}
-                <div className="p-4">
-                  <h3 className="font-['DM_Serif_Display',serif] text-[1rem] text-neutral-100 leading-snug font-normal">
-                    {item.title}
-                  </h3>
-                  <p className="text-[12px] text-blue-700 mt-1">{item.issuer}</p>
-                  <p className="text-[11.5px] text-neutral-600 mt-0.5">
-                    {new Date(item.issueDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'long' })}
-                  </p>
-                  {item.description && (
-                    <p className="mt-2 leading-relaxed text-[12.5px] text-neutral-500 line-clamp-2">
-                      {item.description}
-                    </p>
-                  )}
+                <div className="p-5">
+                  <h3 className="font-['Fraunces',serif] text-lg text-slate-50">{item.title}</h3>
+                  <p className="mt-1 text-sm text-cyan-200/90">{item.issuer}</p>
+                  <p className="mt-1 text-xs text-slate-400">{formatMonthYear(item.issueDate)}</p>
+                  {item.description && <p className="mt-3 line-clamp-2 text-sm text-slate-300/90">{item.description}</p>}
                   {item.credentialUrl && (
                     <a
                       href={item.credentialUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 mt-3 font-['Bebas_Neue'] text-[11px] tracking-[0.15em] text-blue-700 hover:text-blue-500 transition-colors"
+                      className="mt-4 inline-flex text-[11px] uppercase tracking-[0.18em] text-cyan-200 hover:text-cyan-100"
                     >
-                      LIHAT CREDENTIAL ↗
+                      View Credential
                     </a>
                   )}
                 </div>

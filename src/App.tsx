@@ -31,7 +31,7 @@ function App() {
       <Route
         path="/"
         element={(
-          <main className="min-h-screen bg-[var(--bg)]">
+          <main className="public-shell min-h-screen">
             <Navbar />
             <HomePage />
             <Footer />
