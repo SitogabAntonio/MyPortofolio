@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import PaginationControls from '../../components/admin/PaginationControls';
 import { useToast } from '../../components/shared/ToastProvider';
 import { api } from '../../lib/api';
 import type { Skill } from '../../lib/types';
@@ -11,6 +12,9 @@ export default function AdminSkillsListPage() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<(typeof categories)[number]>('all');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(9);
 
   const loadData = async () => {
     setLoading(true);
@@ -28,9 +32,27 @@ export default function AdminSkillsListPage() {
   }, []);
 
   const filteredSkills = useMemo(
-    () => skills.filter((skill) => (category === 'all' ? true : skill.category === category)),
-    [category, skills],
+    () =>
+      skills.filter((skill) => {
+        const categoryMatch = category === 'all' ? true : skill.category === category;
+        const q = search.trim().toLowerCase();
+        const searchMatch = q ? `${skill.name} ${skill.category}`.toLowerCase().includes(q) : true;
+        return categoryMatch && searchMatch;
+      }),
+    [category, search, skills],
   );
+
+  const totalPages = Math.max(1, Math.ceil(filteredSkills.length / pageSize));
+  const start = (page - 1) * pageSize;
+  const pagedSkills = filteredSkills.slice(start, start + pageSize);
+
+  useEffect(() => {
+    setPage(1);
+  }, [category, search]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
   const deleteSkill = async (id: string) => {
     try {
@@ -72,11 +94,19 @@ export default function AdminSkillsListPage() {
             </button>
           ))}
         </div>
+
+        <input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Cari nama skill"
+          className="mt-4 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm"
+        />
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {loading && <p className="text-sm text-neutral-500">Memuat skill...</p>}
-        {filteredSkills.map((skill) => (
+        {!loading && !filteredSkills.length && <p className="text-sm text-neutral-500">Tidak ada skill yang cocok.</p>}
+        {pagedSkills.map((skill) => (
           <article key={skill.id} className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5">
             <div className="flex items-start justify-between">
               <div>
@@ -111,6 +141,22 @@ export default function AdminSkillsListPage() {
             </div>
           </article>
         ))}
+
+        {!loading && filteredSkills.length > 0 && (
+          <div className="sm:col-span-2 xl:col-span-3">
+            <PaginationControls
+              page={page}
+              pageSize={pageSize}
+              totalItems={filteredSkills.length}
+              itemLabel="skill"
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
+          </div>
+        )}
       </section>
     </div>
   );

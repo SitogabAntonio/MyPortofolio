@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import PaginationControls from '../../components/admin/PaginationControls';
 import { useToast } from '../../components/shared/ToastProvider';
 import { api } from '../../lib/api';
 import type { Project } from '../../lib/types';
@@ -9,6 +10,8 @@ export default function AdminProjectsListPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const load = async () => {
     setLoading(true);
@@ -33,6 +36,17 @@ export default function AdminProjectsListPage() {
       }),
     [projects, search],
   );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const start = (page - 1) * pageSize;
+  const pagedProjects = filtered.slice(start, start + pageSize);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
   const remove = async (id: string) => {
     try {
@@ -76,7 +90,7 @@ export default function AdminProjectsListPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-800">
-              {(loading ? [] : filtered).map((project) => (
+              {(loading ? [] : pagedProjects).map((project) => (
                 <tr key={project.id} className="text-neutral-200">
                   <td className="px-3 py-3">
                     <p className="font-medium text-white">{project.title}</p>
@@ -100,9 +114,30 @@ export default function AdminProjectsListPage() {
                   <td colSpan={3} className="px-3 py-6 text-center text-neutral-500">Memuat data...</td>
                 </tr>
               )}
+              {!loading && !filtered.length && (
+                <tr>
+                  <td colSpan={3} className="px-3 py-6 text-center text-neutral-500">
+                    Tidak ada project yang cocok.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
+
+        {!loading && filtered.length > 0 && (
+          <PaginationControls
+            page={page}
+            pageSize={pageSize}
+            totalItems={filtered.length}
+            itemLabel="project"
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
+        )}
       </section>
     </div>
   );

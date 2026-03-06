@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import PaginationControls from '../../components/admin/PaginationControls';
 import { useToast } from '../../components/shared/ToastProvider';
 import { api } from '../../lib/api';
 import type { Gallery } from '../../lib/types';
@@ -8,6 +9,9 @@ export default function AdminGalleriesListPage() {
   const toast = useToast();
   const [items, setItems] = useState<Gallery[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(9);
 
   const loadData = async () => {
     setLoading(true);
@@ -34,6 +38,24 @@ export default function AdminGalleriesListPage() {
     }
   };
 
+  const filteredItems = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((item) => `${item.title} ${item.description ?? ''}`.toLowerCase().includes(q));
+  }, [items, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+  const start = (page - 1) * pageSize;
+  const pagedItems = filteredItems.slice(start, start + pageSize);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
   return (
     <div className="space-y-5">
       <section className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5">
@@ -46,12 +68,19 @@ export default function AdminGalleriesListPage() {
             + Tambah Gallery
           </Link>
         </div>
+
+        <input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Cari judul gallery"
+          className="mt-4 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm"
+        />
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {loading && <p className="text-sm text-neutral-500">Memuat gallery...</p>}
-        {!loading && !items.length && <p className="text-sm text-neutral-500">Belum ada data gallery.</p>}
-        {items.map((item) => (
+        {!loading && !filteredItems.length && <p className="text-sm text-neutral-500">Tidak ada gallery yang cocok.</p>}
+        {pagedItems.map((item) => (
           <article key={item.id} className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4">
             <img src={item.imageUrl} alt={item.title} className="h-40 w-full rounded-lg border border-neutral-800 object-cover" />
             <div className="mt-3 flex items-start justify-between gap-3">
@@ -72,6 +101,22 @@ export default function AdminGalleriesListPage() {
             </div>
           </article>
         ))}
+
+        {!loading && filteredItems.length > 0 && (
+          <div className="sm:col-span-2 xl:col-span-3">
+            <PaginationControls
+              page={page}
+              pageSize={pageSize}
+              totalItems={filteredItems.length}
+              itemLabel="gallery"
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
+          </div>
+        )}
       </section>
     </div>
   );

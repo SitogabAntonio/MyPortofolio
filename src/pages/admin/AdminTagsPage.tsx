@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import PaginationControls from '../../components/admin/PaginationControls';
 import { useToast } from '../../components/shared/ToastProvider';
 import { api } from '../../lib/api';
 import type { Tag } from '../../lib/types';
@@ -8,6 +9,9 @@ export default function AdminTagsPage() {
   const [items, setItems] = useState<Tag[]>([]);
   const [name, setName] = useState('');
   const [editing, setEditing] = useState<Tag | null>(null);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(9);
 
   const load = async () => {
     try {
@@ -45,6 +49,24 @@ export default function AdminTagsPage() {
     setName(tag.name);
   };
 
+  const filteredItems = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((tag) => tag.name.toLowerCase().includes(q));
+  }, [items, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+  const start = (page - 1) * pageSize;
+  const pagedItems = filteredItems.slice(start, start + pageSize);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
   return (
     <div className="space-y-5">
       <section className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5">
@@ -77,7 +99,20 @@ export default function AdminTagsPage() {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {items.map((tag) => (
+        <div className="sm:col-span-2 xl:col-span-3">
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Cari tag"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm"
+          />
+        </div>
+
+        {!filteredItems.length && (
+          <p className="sm:col-span-2 xl:col-span-3 text-sm text-neutral-500">Tidak ada tag yang cocok.</p>
+        )}
+
+        {pagedItems.map((tag) => (
           <article key={tag.id} className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4">
             <p className="font-medium text-white">{tag.name}</p>
             <div className="mt-3 flex gap-2">
@@ -103,6 +138,22 @@ export default function AdminTagsPage() {
             </div>
           </article>
         ))}
+
+        {filteredItems.length > 0 && (
+          <div className="sm:col-span-2 xl:col-span-3">
+            <PaginationControls
+              page={page}
+              pageSize={pageSize}
+              totalItems={filteredItems.length}
+              itemLabel="tag"
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
+          </div>
+        )}
       </section>
     </div>
   );
